@@ -207,13 +207,12 @@ namespace ChessMaster
                     if (currentPiece == null)
                     {
                         this.currentPiece = Cells[index].Piece;
+                        currentPiece.Position = Cells[index].Position;
                         this.lastIndex = index;
-                        List<Point> possiblemoves = Cells[index].Piece.GetPossibleMoves();
+                        List<Point> possiblemoves = currentPiece.GetPossibleMoves();
                         foreach (Point p in possiblemoves)
                         {
                             index = (int)p.Y * 8 + (int)p.X;
-                            
-                            
                            Cells[index].BorderColor = new SolidColorBrush(Colors.Red);
                             
                         }
