@@ -17,6 +17,7 @@ using ChessMaster.AI;
 using ChessMaster.ViewModel;
 using System.ComponentModel;
 
+
 namespace ChessMaster
 {
     /// <summary>
@@ -74,11 +75,83 @@ namespace ChessMaster
                 {
                     ChessCell c = new ChessCell
                     {
-                        Background = new SolidColorBrush((x + y) % 2 == 1 ? Colors.Black : Colors.WhiteSmoke),
-                        BorderColor = new SolidColorBrush(Colors.Black),
-                        //Piece = new BasePiece(x, y),
+                        Background = new SolidColorBrush((x + y) % 2 == 1 ? Colors.Gray : Colors.WhiteSmoke),
+                        BorderColor = new SolidColorBrush(Colors.Black),                                                
                         Position = new Point(x, y)
                     };
+                    if(y == 0)
+                    {
+                        //black pieces
+                        switch (x)
+                        {
+                            case 0:
+                                c.Piece = new Rook(x, y, false);
+                                break;
+                            case 1:
+                                c.Piece = new Knight(x, y, false);
+                                break;
+                            case 2:
+                                c.Piece = new Bishop(x, y, false);
+                                break;
+                            case 3:
+                                c.Piece = new Queen(x, y, false);
+                                break;
+                            case 4:
+                                c.Piece = new King(x, y, false);
+                                break;
+                            case 5:
+                                c.Piece = new Bishop(x, y, false);
+                                break;
+                            case 6:
+                                c.Piece = new Knight(x, y, false);
+                                break;
+                            case 7:
+                                c.Piece = new Rook(x, y, false);
+                                break;
+                        }
+                    }
+                    else if(y == 1)
+                    {
+                        //black pawns
+                        c.Piece = new Pawn(x, y, false);
+                    }
+                    else if(y == 6)
+                    {
+                        //white pawns
+                        c.Piece = new Pawn(x, y);
+                    }
+                    else if(y == 7)
+                    {
+                        //white pieces
+                        switch (x)
+                        {
+                            case 0:
+                                c.Piece = new Rook(x, y);
+                                break;
+                            case 1:
+                                c.Piece = new Knight(x, y);
+                                break;
+                            case 2:
+                                c.Piece = new Bishop(x, y);
+                                break;
+                            case 3:
+                                c.Piece = new Queen(x, y);
+                                break;
+                            case 4:
+                                c.Piece = new King(x, y);
+                                break;
+                            case 5:
+                                c.Piece = new Bishop(x, y);
+                                break;
+                            case 6:
+                                c.Piece = new Knight(x, y);
+                                break;
+                            case 7:
+                                c.Piece = new Rook(x, y);
+                                break;
+                        }
+                    }
+
                     Cells.Add(c);
                 }
             }

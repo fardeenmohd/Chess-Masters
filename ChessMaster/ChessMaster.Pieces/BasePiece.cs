@@ -19,11 +19,12 @@ namespace ChessMaster.Pieces
 
         public Point Position { get; set; }
 
-        public BitmapImage PieceImage { get; set; }
-
-        public BasePiece(int x, int y)
+        public string PieceImage { get; set; }
+        public bool IsWhite { get; set; }
+        public BasePiece(int x, int y, bool isWhite = true)
         {
             Position = new Point(x, y);
+            IsWhite = isWhite;
         }
 
         /// <summary>
@@ -57,7 +58,7 @@ namespace ChessMaster.Pieces
         /// <summary>
         /// Method returns the list of possible vertical moves made by piece
         /// moveLength denotes how far the piece can move on the vertical line 
-        /// Usage: King, Queen, Rock
+        /// Usage: King, Queen, Rook
         /// </summary>
         /// <param name="moveLength"></param>
         /// <returns></returns>
@@ -163,5 +164,7 @@ namespace ChessMaster.Pieces
             }
             return moves;
         }
+        
+
     }
 }
