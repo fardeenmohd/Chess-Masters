@@ -14,7 +14,7 @@
             <Setter Property="Template">
                 <Setter.Value>
                     <ControlTemplate TargetType="Button">
-                        <Border BorderThickness="1" BorderBrush="{TemplateBinding BorderBrush}" Background="{TemplateBinding Background}">
+                        <Border BorderThickness="2" BorderBrush="{TemplateBinding BorderBrush}" Background="{TemplateBinding Background}">
                             <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center" />
                         </Border>
                         <ControlTemplate.Triggers>
@@ -75,8 +75,8 @@
                 </DataTemplate>
             </ItemsControl.ItemTemplate>
         </ItemsControl>
-        
-        <ItemsControl Grid.Column="2" Grid.Row="2" ItemsSource="{Binding Cells}">
+
+        <ItemsControl Grid.Column="2" Grid.Row="2" ItemsSource="{Binding Cells, UpdateSourceTrigger=PropertyChanged}">
             <ItemsControl.ItemsPanel>
                 <ItemsPanelTemplate>
                     <UniformGrid Rows="8" Columns="8"/>
@@ -84,8 +84,9 @@
             </ItemsControl.ItemsPanel>
             <ItemsControl.ItemTemplate>
                 <DataTemplate>
-                    <Button Background="{Binding Background}" BorderBrush="Black" Style="{StaticResource CellStyle}">
-                        <!-- TODO  -->
+                    <Button CommandParameter="{Binding Position}" Command="{Binding RelativeSource={RelativeSource AncestorType={x:Type Window}}, Path=DataContext.CellCommand}" 
+                         Background="{Binding Background}" BorderBrush="{Binding BorderColor}" Style="{StaticResource CellStyle}">
+                        <Image Stretch="UniformToFill" Source="{Binding Piece.PieceImage}"/>
                     </Button>
                 </DataTemplate>
             </ItemsControl.ItemTemplate>

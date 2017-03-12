@@ -49,9 +49,11 @@ namespace ChessMaster
         #region Commands
         private RelayCommand _exitCommand;
         private RelayCommand _newGameCommand;
+        private RelayCommand _cellCommand;
 
         public RelayCommand ExitCommand => _exitCommand ?? (_exitCommand = new RelayCommand(ExecuteExitCommand));
         public RelayCommand NewGameCommand => _newGameCommand ?? (_newGameCommand = new RelayCommand(ExecuteNewGameCommand, CanExecuteNewGameCommand));
+        public RelayCommand CellCommand => _cellCommand ?? (_cellCommand = new RelayCommand(ExecuteCellCommand));
         #endregion
 
         public MainWindow()
@@ -72,7 +74,10 @@ namespace ChessMaster
                 {
                     ChessCell c = new ChessCell
                     {
-                        Background = new SolidColorBrush((x + y) % 2 == 1 ? Colors.Black : Colors.WhiteSmoke)
+                        Background = new SolidColorBrush((x + y) % 2 == 1 ? Colors.Black : Colors.WhiteSmoke),
+                        BorderColor = new SolidColorBrush(Colors.Black),
+                        //Piece = new BasePiece(x, y),
+                        Position = new Point(x, y)
                     };
                     Cells.Add(c);
                 }
@@ -92,6 +97,30 @@ namespace ChessMaster
         public void ExecuteNewGameCommand(object obj)
         {
             //TODO
+        }
+
+        public void ExecuteCellCommand(object obj)
+        {
+            MessageBox.Show("Current Position: " + (Point)obj);
+            //if (obj != null)
+            //{
+            //    Point currentPosition = (Point)obj;
+            //    int index = (int)currentPosition.Y * 8 + (int)currentPosition.X;
+            //    if (Cells[index].BorderColor.Color == Colors.Red)
+            //    {
+            //        MessageBox.Show("Move Piece");
+            //    }
+            //    else if (Cells[index].Piece != null)
+            //    {
+            //        List<Point> possiblemoves = Cells[index].Piece.GetPossibleMoves();
+            //        foreach (Point p in possiblemoves)
+            //        {
+            //            index = (int)p.Y * 8 + (int)p.X;
+            //            Cells[index].BorderColor = new SolidColorBrush(Colors.Red);
+            //        }
+            //    }
+            //    Cells = new List<ChessCell>(Cells);
+            //}
         }
 
         public void OnPropertyChanged(string propertyName)
