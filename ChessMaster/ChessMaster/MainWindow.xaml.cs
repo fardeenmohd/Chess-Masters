@@ -212,7 +212,10 @@ namespace ChessMaster
                         foreach (Point p in possiblemoves)
                         {
                             index = (int)p.Y * 8 + (int)p.X;
-                            Cells[index].BorderColor = new SolidColorBrush(Colors.Red);
+                            
+                            
+                           Cells[index].BorderColor = new SolidColorBrush(Colors.Red);
+                            
                         }
                     }
                     else if(currentPiece!=null && currentPiece!=Cells[index].Piece)
@@ -226,7 +229,8 @@ namespace ChessMaster
                         
                         this.currentPiece = Cells[index].Piece;
                         this.lastIndex = index;
-                        
+
+                      
                     }
                 }
                 
