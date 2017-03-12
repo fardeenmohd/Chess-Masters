@@ -44,7 +44,8 @@ namespace ChessMaster
             }
         }
         #endregion
-
+        public BasePiece currentPiece;
+        public int lastIndex;
         public event PropertyChangedEventHandler PropertyChanged;
 
         #region Commands
@@ -175,25 +176,62 @@ namespace ChessMaster
         public void ExecuteCellCommand(object obj)
         {
             MessageBox.Show("Current Position: " + (Point)obj);
-            //if (obj != null)
-            //{
-            //    Point currentPosition = (Point)obj;
-            //    int index = (int)currentPosition.Y * 8 + (int)currentPosition.X;
-            //    if (Cells[index].BorderColor.Color == Colors.Red)
-            //    {
-            //        MessageBox.Show("Move Piece");
-            //    }
-            //    else if (Cells[index].Piece != null)
-            //    {
-            //        List<Point> possiblemoves = Cells[index].Piece.GetPossibleMoves();
-            //        foreach (Point p in possiblemoves)
-            //        {
-            //            index = (int)p.Y * 8 + (int)p.X;
-            //            Cells[index].BorderColor = new SolidColorBrush(Colors.Red);
-            //        }
-            //    }
-            //    Cells = new List<ChessCell>(Cells);
-            //}
+           if (obj != null)
+            {
+               Point currentPosition = (Point)obj;
+               int index = (int)currentPosition.Y * 8 + (int)currentPosition.X;
+                if (Cells[index].BorderColor.Color == Colors.Red)
+                {
+                    MessageBox.Show("Move Piece");
+                    if (currentPiece != null)
+                    {
+                        if (Cells[index].Piece == null || !Cells[index].Piece.IsWhite )
+                        {
+
+                            this.Cells[index].Piece = currentPiece;
+                            List<Point> possiblemoves = currentPiece.GetPossibleMoves();
+                            foreach (Point p in possiblemoves)
+                            {
+                                index = (int)p.Y * 8 + (int)p.X;
+                                Cells[index].BorderColor = new SolidColorBrush(Colors.Black);
+                            }
+                            currentPiece.Position = Cells[index].Position;
+                            this.Cells[lastIndex].Piece = null;
+                            lastIndex = 0;
+                            currentPiece = null;
+                        }
+                    }
+                }
+                else if (Cells[index].Piece != null && Cells[index].Piece.IsWhite)
+                {
+                    if (currentPiece == null)
+                    {
+                        this.currentPiece = Cells[index].Piece;
+                        this.lastIndex = index;
+                        List<Point> possiblemoves = Cells[index].Piece.GetPossibleMoves();
+                        foreach (Point p in possiblemoves)
+                        {
+                            index = (int)p.Y * 8 + (int)p.X;
+                            Cells[index].BorderColor = new SolidColorBrush(Colors.Red);
+                        }
+                    }
+                    else if(currentPiece!=null && currentPiece!=Cells[index].Piece)
+                    {
+                        List<Point> lastpossiblemoves =currentPiece.GetPossibleMoves();
+                        foreach (Point p in lastpossiblemoves)
+                        {
+                            index = (int)p.Y * 8 + (int)p.X;
+                            Cells[index].BorderColor = new SolidColorBrush(Colors.Black);
+                        }
+                        
+                        this.currentPiece = Cells[index].Piece;
+                        this.lastIndex = index;
+                        
+                    }
+                }
+                
+               Cells = new List<ChessCell>(Cells);
+            }
         }
 
         public void OnPropertyChanged(string propertyName)
