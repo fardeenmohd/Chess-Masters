@@ -55,8 +55,16 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </ApplicationDefinition>
+    <Compile Include="Dialogs\PromotionWindow.xaml.cs">
+      <DependentUpon>PromotionWindow.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="ViewModel\ChessBoard.cs" />
     <Compile Include="ViewModel\ChessCell.cs" />
     <Compile Include="ViewModel\RelayCommand.cs" />
+    <Page Include="Dialogs\PromotionWindow.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
     <Page Include="MainWindow.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
@@ -106,6 +114,9 @@
       <Project>{434701f8-ec85-40d0-a035-f9300865e6cd}</Project>
       <Name>ChessMaster.Pieces</Name>
     </ProjectReference>
+  </ItemGroup>
+  <ItemGroup>
+    <Folder Include="Images\" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

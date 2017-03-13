@@ -1,0 +1,44 @@
+﻿<Window x:Class="ChessMaster.Dialogs.PromotionWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:ChessMaster.Dialogs"
+        mc:Ignorable="d"
+        Title="PromotionWindow" Height="300" Width="300" WindowStyle="None"
+        WindowStartupLocation="CenterOwner">
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="*"/>
+        </Grid.RowDefinitions>
+        <TextBlock HorizontalAlignment="Center" Margin="5, 10" Text="Select piece: " FontSize="20"/>
+        <Button Margin="5" Grid.Row="1" Command="{Binding RookCommand}">
+            <StackPanel Orientation="Horizontal">
+                <Image Source="{Binding RookImage}"/>
+                <Label Margin="5, 0, 0, 0" Content="Rook" FontSize="15"/>
+            </StackPanel>
+        </Button>
+        <Button Margin="5" Grid.Row="2" Command="{Binding KnightCommand}">
+            <StackPanel Orientation="Horizontal">
+                <Image Source="{Binding KnightImage}"/>
+                <Label Margin="5, 0, 0, 0" Content="Knight" FontSize="15"/>
+            </StackPanel>
+        </Button>
+        <Button Margin="5" Grid.Row="3" Command="{Binding BishopCommand}">
+            <StackPanel Orientation="Horizontal">
+                <Image Source="{Binding BishopImage}"/>
+                <Label Margin="5, 0, 0, 0" Content="Bishop" FontSize="15"/>
+            </StackPanel>
+        </Button>
+        <Button Margin="5" Grid.Row="4" Command="{Binding QueenCommand}">
+            <StackPanel Orientation="Horizontal">
+                <Image Source="{Binding QueenImage}"/>
+                <Label Margin="5, 0, 0, 0" Content="Queen" FontSize="15"/>
+            </StackPanel>
+        </Button>
+    </Grid>
+</Window>
