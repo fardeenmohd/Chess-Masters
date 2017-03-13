@@ -9,7 +9,7 @@ using System.Windows;
 namespace ChessMaster.Pieces
 {
     public class Pawn : BasePiece
-    {
+    { 
         public Pawn(int x, int y, bool isWhite = true) : base(x, y, isWhite)
         {
             if (IsWhite)
@@ -21,11 +21,9 @@ namespace ChessMaster.Pieces
                 PieceImage = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "../../Images/black_pawn.png");
             }
         }
-        public override List<Point> GetPossibleMoves()
+        public override List<Point> GetPossibleMoves(List<BasePiece> board)
         {
-            return base.GetPawnMoves();
+            return GetPawnMoves(board, IsFirstMove);
         }
-
-
     }
 }

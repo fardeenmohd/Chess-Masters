@@ -21,9 +21,9 @@ namespace ChessMaster.Pieces
                 PieceImage = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "../../Images/black_rook.png");
             }
         }
-        public override List<Point> GetPossibleMoves()
+        public override List<Point> GetPossibleMoves(List<BasePiece> board)
         {
-            return base.GetVerticalMoves(7).Union(GetHorizontalMoves(7)).ToList();
+            return base.GetVerticalMoves(board, BOARDLENGTH).Union(GetHorizontalMoves(board, BOARDLENGTH)).ToList();
         }
     }
 }

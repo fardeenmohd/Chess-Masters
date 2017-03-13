@@ -21,10 +21,10 @@ namespace ChessMaster.Pieces
                 PieceImage = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "../../Images/black_king.png");
             }
         }
-        public override List<Point> GetPossibleMoves()
+        public override List<Point> GetPossibleMoves(List<BasePiece> board)
         {
             //by default move length is 1
-            return GetDiagonalMoves().Union(GetHorizontalMoves()).Union(GetVerticalMoves()).ToList();
+            return GetDiagonalMoves(board).Union(GetHorizontalMoves(board)).Union(GetVerticalMoves(board)).ToList();
         }
     }
 }

@@ -21,9 +21,9 @@ namespace ChessMaster.Pieces
                 PieceImage = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "../../Images/black_queen.png");
             }
         }
-        public override List<Point> GetPossibleMoves()
+        public override List<Point> GetPossibleMoves(List<BasePiece> board)
         {
-            return GetDiagonalMoves(7).Union(GetVerticalMoves(7)).Union(GetHorizontalMoves(7)).ToList();
+            return GetDiagonalMoves(board, BOARDLENGTH).Union(GetVerticalMoves(board, BOARDLENGTH)).Union(GetHorizontalMoves(board, BOARDLENGTH)).ToList();
         }
     }
 }

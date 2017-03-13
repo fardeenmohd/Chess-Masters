@@ -44,8 +44,13 @@ namespace ChessMaster
             }
         }
         #endregion
-        public BasePiece currentPiece;
-        public int lastIndex;
+
+        public BasePiece CurrentPiece;
+
+        public int LastIndex;
+
+        public ChessBoard ChessBoard;
+
         public event PropertyChangedEventHandler PropertyChanged;
 
         #region Commands
@@ -69,93 +74,9 @@ namespace ChessMaster
         {
             Numbers = Enumerable.Range(1, 8).Reverse().ToList();
             Letters = new List<char> { 'a', 'b', 'c', 'd', 'e', 'f', 'g', 'h' };
-            Cells = new List<ChessCell>();
-            for (int y = 0; y < 8; y++)
-            {
-                for (int x = 0; x < 8; x++)
-                {
-                    ChessCell c = new ChessCell
-                    {
-                        Background = new SolidColorBrush((x + y) % 2 == 1 ? Colors.Gray : Colors.WhiteSmoke),
-                        BorderColor = new SolidColorBrush(Colors.Black),                                                
-                        Position = new Point(x, y)
-                    };
-                    if(y == 0)
-                    {
-                        //black pieces
-                        switch (x)
-                        {
-                            case 0:
-                                c.Piece = new Rook(x, y, false);
-                                break;
-                            case 1:
-                                c.Piece = new Knight(x, y, false);
-                                break;
-                            case 2:
-                                c.Piece = new Bishop(x, y, false);
-                                break;
-                            case 3:
-                                c.Piece = new Queen(x, y, false);
-                                break;
-                            case 4:
-                                c.Piece = new King(x, y, false);
-                                break;
-                            case 5:
-                                c.Piece = new Bishop(x, y, false);
-                                break;
-                            case 6:
-                                c.Piece = new Knight(x, y, false);
-                                break;
-                            case 7:
-                                c.Piece = new Rook(x, y, false);
-                                break;
-                        }
-                    }
-                    else if(y == 1)
-                    {
-                        //black pawns
-                        c.Piece = new Pawn(x, y, false);
-                    }
-                    else if(y == 6)
-                    {
-                        //white pawns
-                        c.Piece = new Pawn(x, y);
-                    }
-                    else if(y == 7)
-                    {
-                        //white pieces
-                        switch (x)
-                        {
-                            case 0:
-                                c.Piece = new Rook(x, y);
-                                break;
-                            case 1:
-                                c.Piece = new Knight(x, y);
-                                break;
-                            case 2:
-                                c.Piece = new Bishop(x, y);
-                                break;
-                            case 3:
-                                c.Piece = new Queen(x, y);
-                                break;
-                            case 4:
-                                c.Piece = new King(x, y);
-                                break;
-                            case 5:
-                                c.Piece = new Bishop(x, y);
-                                break;
-                            case 6:
-                                c.Piece = new Knight(x, y);
-                                break;
-                            case 7:
-                                c.Piece = new Rook(x, y);
-                                break;
-                        }
-                    }
-
-                    Cells.Add(c);
-                }
-            }
+            ChessBoard = new ChessBoard();
+            Cells = ChessBoard.Board;
+           
         }
 
         public bool CanExecuteNewGameCommand(object obj)
@@ -175,65 +96,20 @@ namespace ChessMaster
 
         public void ExecuteCellCommand(object obj)
         {
-            MessageBox.Show("Current Position: " + (Point)obj);
-           if (obj != null)
+            //MessageBox.Show("Current Position: " + (Point)obj);
+            if (obj != null)
             {
-               Point currentPosition = (Point)obj;
-               int index = (int)currentPosition.Y * 8 + (int)currentPosition.X;
+                Point currentPosition = (Point)obj;
+                int index = (int)currentPosition.Y * 8 + (int)currentPosition.X;
                 if (Cells[index].BorderColor.Color == Colors.Red)
                 {
-                    MessageBox.Show("Move Piece");
-                    if (currentPiece != null)
-                    {
-                        if (Cells[index].Piece == null || !Cells[index].Piece.IsWhite )
-                        {
-
-                            this.Cells[index].Piece = currentPiece;
-                            List<Point> possiblemoves = currentPiece.GetPossibleMoves();
-                            foreach (Point p in possiblemoves)
-                            {
-                                index = (int)p.Y * 8 + (int)p.X;
-                                Cells[index].BorderColor = new SolidColorBrush(Colors.Black);
-                            }
-                            currentPiece.Position = Cells[index].Position;
-                            this.Cells[lastIndex].Piece = null;
-                            lastIndex = 0;
-                            currentPiece = null;
-                        }
-                    }
+                    ChessBoard.MakeMove(index);
                 }
                 else if (Cells[index].Piece != null && Cells[index].Piece.IsWhite)
                 {
-                    if (currentPiece == null)
-                    {
-                        this.currentPiece = Cells[index].Piece;
-                        currentPiece.Position = Cells[index].Position;
-                        this.lastIndex = index;
-                        List<Point> possiblemoves = currentPiece.GetPossibleMoves();
-                        foreach (Point p in possiblemoves)
-                        {
-                            index = (int)p.Y * 8 + (int)p.X;
-                           Cells[index].BorderColor = new SolidColorBrush(Colors.Red);
-                            
-                        }
-                    }
-                    else if(currentPiece!=null && currentPiece!=Cells[index].Piece)
-                    {
-                        List<Point> lastpossiblemoves =currentPiece.GetPossibleMoves();
-                        foreach (Point p in lastpossiblemoves)
-                        {
-                            index = (int)p.Y * 8 + (int)p.X;
-                            Cells[index].BorderColor = new SolidColorBrush(Colors.Black);
-                        }
-                        
-                        this.currentPiece = Cells[index].Piece;
-                        this.lastIndex = index;
-
-                      
-                    }
+                    ChessBoard.ShowPossibleMoves(index);
                 }
-                
-               Cells = new List<ChessCell>(Cells);
+                Cells = new List<ChessCell>(ChessBoard.Board);
             }
         }
 

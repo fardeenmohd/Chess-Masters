@@ -22,9 +22,9 @@ namespace ChessMaster.Pieces
             }
 
         }
-        public override List<Point> GetPossibleMoves()
+        public override List<Point> GetPossibleMoves(List<BasePiece> board)
         {
-            return base.GetDiagonalMoves(7);
+            return base.GetDiagonalMoves(board, BOARDLENGTH);
         }
     }
 }

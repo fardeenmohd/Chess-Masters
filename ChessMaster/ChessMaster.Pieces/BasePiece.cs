@@ -20,18 +20,24 @@ namespace ChessMaster.Pieces
         public Point Position { get; set; }
 
         public string PieceImage { get; set; }
+
         public bool IsWhite { get; set; }
+
+        //Used for pawns only
+        public bool IsFirstMove { get; set; }
+
         public BasePiece(int x, int y, bool isWhite = true)
         {
             Position = new Point(x, y);
             IsWhite = isWhite;
+            IsFirstMove = true;
         }
 
         /// <summary>
         /// Method should be overriden in the derived classes
         /// </summary>
         /// <returns></returns>
-        public virtual List<Point> GetPossibleMoves()
+        public virtual List<Point> GetPossibleMoves(List<BasePiece> board)
         {
             return new List<Point>();
         }
@@ -43,15 +49,21 @@ namespace ChessMaster.Pieces
         /// </summary>
         /// <param name="moveLength"></param>
         /// <returns></returns>
-        protected List<Point> GetHorizontalMoves(int moveLength = 1)
+        protected List<Point> GetHorizontalMoves(List<BasePiece> board, int moveLength = 1)
         {
             List<Point> moves = new List<Point>();
             int leftborder = (int)Position.X - moveLength > 0 ? (int)Position.X - moveLength : 0;
             int rightborder = (int)Position.X + moveLength < 7 ? (int)Position.X + moveLength : 7;
-            for (int i = leftborder; i < Position.X; i++)
-                moves.Add(new Point(i, Position.Y));
-            for (int i = rightborder; i > Position.X; i--)
-                moves.Add(new Point(i, Position.Y));
+            for (int i = (int) Position.X - 1; i >= leftborder; i--)
+            {
+                if (AddMove(board, new Point(i, Position.Y), ref moves))
+                    break;
+            }
+            for (int i = (int)Position.X + 1; i <= rightborder; i++)
+            {
+                if (AddMove(board, new Point(i, Position.Y), ref moves))
+                    break;
+            }
             return moves;
         }
 
@@ -62,15 +74,21 @@ namespace ChessMaster.Pieces
         /// </summary>
         /// <param name="moveLength"></param>
         /// <returns></returns>
-        protected List<Point> GetVerticalMoves(int moveLength = 1)
+        protected List<Point> GetVerticalMoves(List<BasePiece> board, int moveLength = 1)
         {
             List<Point> moves = new List<Point>();
-            int upborder = (int)Position.Y - moveLength > 0 ? (int)Position.X - moveLength : 0;
-            int bottomborder = (int)Position.X + moveLength < 7 ? (int)Position.X + moveLength : 7;
-            for (int i = upborder; i < Position.Y; i++)
-                moves.Add(new Point(Position.X, i));
-            for (int i = bottomborder; i > Position.Y; i--)
-                moves.Add(new Point(Position.X, i));
+            int upborder = (int)Position.Y - moveLength > 0 ? (int)Position.Y - moveLength : 0;
+            int bottomborder = (int)Position.Y + moveLength < 7 ? (int)Position.Y + moveLength : 7;
+            for (int i = (int) Position.Y - 1; i >= upborder; i--)
+            {
+                if (AddMove(board, new Point(Position.X, i), ref moves))
+                    break;
+            }
+            for (int i = (int)Position.Y + 1;  i <= bottomborder; i++)
+            {
+                if (AddMove(board, new Point(Position.X, i), ref moves))
+                    break;
+            }
             return moves;
         }
 
@@ -81,22 +99,28 @@ namespace ChessMaster.Pieces
         /// </summary>
         /// <param name="moveLength"></param>
         /// <returns></returns>
-        protected List<Point> GetDiagonalMoves(int moveLength = 1)
+        protected List<Point> GetDiagonalMoves(List<BasePiece> board, int moveLength = 1)
         {
             List<Point> moves = new List<Point>();
-            for (int i = (int)Position.Y - 1, step = 1; step <= moveLength && i >= 0; step++, i--)
+            for (int i = (int)Position.Y - 1, step = 1; step + Position.X <= 7 && step <= moveLength && i >= 0; step++, i--)
             {
-                if (step + Position.X <= 7)
-                    moves.Add(new Point(Position.X + step, i));
-                if (Position.X - step >= 0)
-                    moves.Add(new Point(Position.X - step, i));
+                    if (AddMove(board, new Point(Position.X + step, i), ref moves))
+                        break;
             }
-            for (int i = (int)Position.Y + 1, step = 1; step <= moveLength && i < 8; step++, i++)
+            for (int i = (int)Position.Y - 1, step = 1; Position.X - step >= 0 && step <= moveLength && i >= 0; step++, i--)
             {
-                if (step + Position.X <= 7)
-                    moves.Add(new Point(Position.X + step, i));
-                if (Position.X - step >= 0)
-                    moves.Add(new Point(Position.X - step, i));
+                if (AddMove(board, new Point(Position.X - step, i), ref moves))
+                    break;
+            }
+            for (int i = (int)Position.Y + 1, step = 1; step + Position.X <= 7 && step <= moveLength && i < 8; step++, i++)
+            {
+                if (AddMove(board, new Point(Position.X + step, i), ref moves))
+                    break;
+            }
+            for (int i = (int)Position.Y + 1, step = 1; Position.X - step >= 0 && step <= moveLength && i < 8; step++, i++)
+            {
+                if (AddMove(board, new Point(Position.X - step, i), ref moves))
+                    break;
             }
             return moves;
         }
@@ -106,36 +130,36 @@ namespace ChessMaster.Pieces
         /// Method returns a list of possible moves made by Knight
         /// </summary>
         /// <returns></returns>
-        protected List<Point> GetKnightMoves()
+        protected List<Point> GetKnightMoves(List<BasePiece> board)
         {
             List<Point> moves = new List<Point>();
             if (Position.X - 2 >= 0)
             {
                 if (Position.Y < 7)
-                    moves.Add(new Point(Position.X - 2, Position.Y + 1));
+                    AddMove(board, new Point(Position.X - 2, Position.Y + 1), ref moves);
                 if (Position.Y > 0)
-                    moves.Add(new Point(Position.X - 2, Position.Y - 1));
+                    AddMove(board, new Point(Position.X - 2, Position.Y - 1), ref moves);
             }
             if (Position.X < 6)
             {
                 if (Position.Y < 7)
-                    moves.Add(new Point(Position.X + 2, Position.Y + 1));
+                    AddMove(board, new Point(Position.X + 2, Position.Y + 1), ref moves);
                 if (Position.Y > 0)
-                    moves.Add(new Point(Position.X + 2, Position.Y - 1));
+                    AddMove(board, new Point(Position.X + 2, Position.Y - 1), ref moves);
             }
             if (Position.Y - 2 >= 0)
             {
                 if (Position.X < 7)
-                    moves.Add(new Point(Position.X + 1, Position.Y - 2));
+                    AddMove(board, new Point(Position.X + 1, Position.Y - 2), ref moves);
                 if (Position.X > 0)
-                    moves.Add(new Point(Position.X - 1, Position.Y - 2));
+                    AddMove(board, new Point(Position.X - 1, Position.Y - 2), ref moves);
             }
             if (Position.Y < 6)
             {
                 if (Position.X < 7)
-                    moves.Add(new Point(Position.X + 1, Position.Y + 2));
+                    AddMove(board, new Point(Position.X + 1, Position.Y + 2), ref moves);
                 if (Position.X > 0)
-                    moves.Add(new Point(Position.X - 1, Position.Y + 2));
+                    AddMove(board, new Point(Position.X - 1, Position.Y + 2), ref moves);
             }
             return moves;
         }
@@ -148,23 +172,57 @@ namespace ChessMaster.Pieces
         /// <param name="isFirstMove"></param>
         /// <param name="isUserPawn"></param>
         /// <returns></returns>
-        protected List<Point> GetPawnMoves(bool isFirstMove = false, bool isUserPawn = true)
+        protected List<Point> GetPawnMoves(List<BasePiece> board, bool isFirstMove = false, bool isUserPawn = true)
         {
             List<Point> moves = new List<Point>();
             if (isUserPawn)
-                moves.Add(new Point(Position.X, Position.Y - 1));
-            else
-                moves.Add(new Point(Position.X, Position.Y + 1));
-            if(isFirstMove)
             {
-                if(isUserPawn)
-                    moves.Add(new Point(Position.X, Position.Y - 2));
+                if (board[(int)Position.X + 8 * ((int)Position.Y - 1)] == null)
+                    moves.Add(new Point(Position.X, Position.Y - 1));
+            }
+            else
+            {
+                if (board[(int)Position.X + 8 * ((int)Position.Y + 1)] == null)
+                    moves.Add(new Point(Position.X, Position.Y + 1));
+            }
+            if (isFirstMove)
+            {
+                if (isUserPawn)
+                {
+                    if (board[(int)Position.X + 8 * ((int)Position.Y - 2)] == null)
+                        moves.Add(new Point(Position.X, Position.Y - 2));
+                }
                 else
-                    moves.Add(new Point(Position.X, Position.Y + 2));
+                {
+                    if (board[(int)Position.X + 8 * ((int)Position.Y + 2)] == null)
+                        moves.Add(new Point(Position.X, Position.Y + 2));
+                }
             }
             return moves;
         }
         
-
+        /// <summary>
+        /// Method adds moves to the list if this is possible
+        /// Method returns false, where there is a piece which blocks its way
+        /// </summary>
+        /// <param name="board"></param>
+        /// <param name="point"></param>
+        /// <param name="moves"></param>
+        /// <returns></returns>
+        private bool AddMove(List<BasePiece> board, Point point, ref List<Point> moves)
+        {
+            int index = 8*(int)point.Y + (int)point.X;
+            if(board[index]==null)
+            {
+                moves.Add(point);
+                return false;
+            }
+            else if(board[index].IsWhite != IsWhite)
+            {
+                moves.Add(point);
+                return true;
+            }
+            return true;
+        }
     }
 }
