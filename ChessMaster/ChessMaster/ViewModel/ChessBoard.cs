@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 using System.Windows.Media;
 using ChessMaster.Pieces;
 using System.Windows;
+using ChessMaster.Dialogs;
 
 namespace ChessMaster.ViewModel
 {
@@ -68,6 +69,14 @@ namespace ChessMaster.ViewModel
             if (CurrentPiece != null)
             {
                 AssignCellBlackBorder();
+                if(CurrentPiece is Pawn && Board[index].Position.Y == 0 || Board[index].Position.Y == 7)
+                {
+                    PromotionWindow dialog = new PromotionWindow(CurrentPiece.IsWhite);
+                    if (dialog.ShowDialog() == true)
+                    {
+                        CurrentPiece = dialog.SelectedPiece;
+                    }
+                }
                 CurrentPiece.Position = Board[index].Position;
                 CurrentPiece.IsFirstMove = false;
                 Board[index].Piece = CurrentPiece;

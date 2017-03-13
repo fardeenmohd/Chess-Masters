@@ -16,6 +16,7 @@ using ChessMaster.Pieces;
 using ChessMaster.AI;
 using ChessMaster.ViewModel;
 using System.ComponentModel;
+using ChessMaster.Dialogs;
 
 
 namespace ChessMaster
@@ -45,10 +46,6 @@ namespace ChessMaster
         }
         #endregion
 
-        public BasePiece CurrentPiece;
-
-        public int LastIndex;
-
         public ChessBoard ChessBoard;
 
         public event PropertyChangedEventHandler PropertyChanged;
@@ -75,8 +72,7 @@ namespace ChessMaster
             Numbers = Enumerable.Range(1, 8).Reverse().ToList();
             Letters = new List<char> { 'a', 'b', 'c', 'd', 'e', 'f', 'g', 'h' };
             ChessBoard = new ChessBoard();
-            Cells = ChessBoard.Board;
-           
+            Cells = ChessBoard.Board;          
         }
 
         public bool CanExecuteNewGameCommand(object obj)

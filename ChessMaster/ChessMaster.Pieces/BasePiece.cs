@@ -175,35 +175,21 @@ namespace ChessMaster.Pieces
         protected List<Point> GetPawnMoves(List<BasePiece> board, bool isFirstMove = false, bool isUserPawn = true)
         {
             List<Point> moves = new List<Point>();
-            if (isUserPawn)
+            int offset = isUserPawn ? -1 : 1;
+            int doubleOffset = isUserPawn ? -2 : 2;
+            if (board[(int)Position.X + 8 * ((int)Position.Y + offset)] == null)
             {
-                if (board[(int)Position.X + 8 * ((int)Position.Y - 1)] == null)
-                    moves.Add(new Point(Position.X, Position.Y - 1));
+                moves.Add(new Point(Position.X, Position.Y + offset));
+                if (IsFirstMove && board[(int)Position.X + 8 * ((int)Position.Y + doubleOffset)] == null)
+                    moves.Add(new Point(Position.X, Position.Y + doubleOffset));
             }
-            else
-            {
-                if (board[(int)Position.X + 8 * ((int)Position.Y + 1)] == null)
-                    moves.Add(new Point(Position.X, Position.Y + 1));
-            }
-            if (isFirstMove)
-            {
-                if (isUserPawn)
-                {
-                    if (board[(int)Position.X + 8 * ((int)Position.Y - 2)] == null)
-                        moves.Add(new Point(Position.X, Position.Y - 2));
-                }
-                else
-                {
-                    if (board[(int)Position.X + 8 * ((int)Position.Y + 2)] == null)
-                        moves.Add(new Point(Position.X, Position.Y + 2));
-                }
-            }
+            AddPawnAttackMoves(board, ref moves, isUserPawn);
             return moves;
         }
         
         /// <summary>
         /// Method adds moves to the list if this is possible
-        /// Method returns false, where there is a piece which blocks its way
+        /// Method returns true, when there is a piece which blocks its way
         /// </summary>
         /// <param name="board"></param>
         /// <param name="point"></param>
@@ -223,6 +209,23 @@ namespace ChessMaster.Pieces
                 return true;
             }
             return true;
+        }
+
+        /// <summary>
+        /// Method adds diagonal attacking moves for the Pawn
+        /// </summary>
+        /// <param name="board"></param>
+        /// <param name="moves"></param>
+        /// <param name="isUserPawn"></param>
+        private void AddPawnAttackMoves(List<BasePiece> board, ref List<Point> moves, bool isUserPawn)
+        {
+            int offset = isUserPawn ? -1 : 1;
+            BasePiece leftCell = board[((int)Position.Y + offset) * 8 + (int)Position.X - 1];
+            BasePiece rightCell = board[((int)Position.Y + offset) * 8 + (int)Position.X + 1];
+            if (leftCell != null && leftCell.IsWhite != IsWhite)
+                moves.Add(new Point(Position.X - 1, Position.Y + offset));
+            if (rightCell != null && rightCell.IsWhite != IsWhite)
+                moves.Add(new Point(Position.X + 1, Position.Y + offset));
         }
     }
 }
