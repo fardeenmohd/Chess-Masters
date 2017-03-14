@@ -69,7 +69,7 @@ namespace ChessMaster.ViewModel
             if (CurrentPiece != null)
             {
                 AssignCellBlackBorder();
-                if(CurrentPiece is Pawn && Board[index].Position.Y == 0 || Board[index].Position.Y == 7)
+                if(CurrentPiece is Pawn && (Board[index].Position.Y == 0 || Board[index].Position.Y == 7))
                 {
                     PromotionWindow dialog = new PromotionWindow(CurrentPiece.IsWhite);
                     if (dialog.ShowDialog() == true)

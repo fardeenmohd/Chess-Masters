@@ -222,9 +222,9 @@ namespace ChessMaster.Pieces
             int offset = isUserPawn ? -1 : 1;
             BasePiece leftCell = board[((int)Position.Y + offset) * 8 + (int)Position.X - 1];
             BasePiece rightCell = board[((int)Position.Y + offset) * 8 + (int)Position.X + 1];
-            if (leftCell != null && leftCell.IsWhite != IsWhite)
+            if (leftCell != null && leftCell.IsWhite != IsWhite && (int)Position.X != 0)
                 moves.Add(new Point(Position.X - 1, Position.Y + offset));
-            if (rightCell != null && rightCell.IsWhite != IsWhite)
+            if (rightCell != null && rightCell.IsWhite != IsWhite && (int)Position.X != 7)
                 moves.Add(new Point(Position.X + 1, Position.Y + offset));
         }
     }
