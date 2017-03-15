@@ -167,23 +167,23 @@ namespace ChessMaster.Pieces
         /// <summary>
         /// This method returns basic moves of the pawn
         /// isFirstMove indicates whether the move is first one done by the pawn
-        /// isUserPawn indicates who is the owner of the pawn (AI or User)
+        /// isWhitePawn indicates which pawn it is (White pawn moves up and black pawn moves down)
         /// </summary>
         /// <param name="isFirstMove"></param>
-        /// <param name="isUserPawn"></param>
+        /// <param name="isWhitePawn"></param>
         /// <returns></returns>
-        protected List<Point> GetPawnMoves(List<BasePiece> board, bool isFirstMove = false, bool isUserPawn = true)
+        protected List<Point> GetPawnMoves(List<BasePiece> board, bool isFirstMove = false, bool isWhitePawn = true)
         {
             List<Point> moves = new List<Point>();
-            int offset = isUserPawn ? -1 : 1;
-            int doubleOffset = isUserPawn ? -2 : 2;
+            int offset = isWhitePawn ? -1 : 1;
+            int doubleOffset = isWhitePawn ? -2 : 2;
             if (board[(int)Position.X + 8 * ((int)Position.Y + offset)] == null)
             {
                 moves.Add(new Point(Position.X, Position.Y + offset));
                 if (IsFirstMove && board[(int)Position.X + 8 * ((int)Position.Y + doubleOffset)] == null)
                     moves.Add(new Point(Position.X, Position.Y + doubleOffset));
             }
-            AddPawnAttackMoves(board, ref moves, isUserPawn);
+            AddPawnAttackMoves(board, ref moves, isWhitePawn);
             return moves;
         }
         
@@ -216,10 +216,10 @@ namespace ChessMaster.Pieces
         /// </summary>
         /// <param name="board"></param>
         /// <param name="moves"></param>
-        /// <param name="isUserPawn"></param>
-        private void AddPawnAttackMoves(List<BasePiece> board, ref List<Point> moves, bool isUserPawn)
+        /// <param name="isWhitePawn"></param>
+        private void AddPawnAttackMoves(List<BasePiece> board, ref List<Point> moves, bool isWhitePawn)
         {
-            int offset = isUserPawn ? -1 : 1;
+            int offset = isWhitePawn ? -1 : 1;
             BasePiece leftCell = board[((int)Position.Y + offset) * 8 + (int)Position.X - 1];
             BasePiece rightCell = board[((int)Position.Y + offset) * 8 + (int)Position.X + 1];
             if (leftCell != null && leftCell.IsWhite != IsWhite && (int)Position.X != 0)
