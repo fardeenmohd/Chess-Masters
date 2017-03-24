@@ -6,6 +6,10 @@
         xmlns:local="clr-namespace:ChessMaster"
         mc:Ignorable="d"
         Title="Chess Master" Height="600" Width="600"
+        MinHeight="600"
+        MinWidth="600"
+        MaxHeight="600"
+        MaxWidth="600"
         WindowStartupLocation="CenterScreen">
     <Window.Resources>
         <Style TargetType="{x:Type Button}" x:Key="CellStyle">
