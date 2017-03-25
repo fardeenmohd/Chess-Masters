@@ -6,6 +6,10 @@
         xmlns:local="clr-namespace:ChessMaster"
         mc:Ignorable="d"
         Title="Chess Master" Height="600" Width="600"
+        MinHeight="600"
+        MinWidth="600"
+        MaxHeight="600"
+        MaxWidth="600"
         WindowStartupLocation="CenterScreen">
     <Window.Resources>
         <Style TargetType="{x:Type Button}" x:Key="CellStyle">
@@ -44,12 +48,22 @@
         
         <Menu Grid.ColumnSpan="5">
             <MenuItem Header="File">
-                <MenuItem Header="New Game" Command="{Binding NewGameCommand}"/>
+                <MenuItem Header="New Game">
+                    <MenuItem Header="New game against AI" Command="{Binding NewGameAgainstAICommand}"/>
+                    <MenuItem Header="New game against human" Command="{Binding NewGameAgainstHumanCommand}"/>
+                </MenuItem>
                 <Separator/>
                 <MenuItem Header="Exit" Command="{Binding ExitCommand}"/>
             </MenuItem>
         </Menu>
-        
+
+        <StackPanel Grid.Row="1" Grid.ColumnSpan="4" Orientation="Horizontal" HorizontalAlignment="Center" VerticalAlignment="Center">
+            <Label Content="Black side timer" Margin="5"/>
+            <TextBox IsReadOnly="True" Margin="5, 5, 5, 5" Text="{Binding BlackSideTime}"/>
+            <Label Content="White side timer" Margin="5, 5, 5, 5"/>
+            <TextBox IsReadOnly="True" Margin="5" Text="{Binding WhiteSideTime}"/>
+        </StackPanel>
+
         <ItemsControl Grid.Column="1" Grid.Row="2" ItemsSource="{Binding Numbers}">
             <ItemsControl.ItemsPanel>
                 <ItemsPanelTemplate>

@@ -69,7 +69,7 @@ namespace ChessMaster.ViewModel
             if (CurrentPiece != null)
             {
                 AssignCellBlackBorder();
-                if(CurrentPiece is Pawn && Board[index].Position.Y == 0 || Board[index].Position.Y == 7)
+                if(CurrentPiece is Pawn && (Board[index].Position.Y == 0 || Board[index].Position.Y == 7))
                 {
                     PromotionWindow dialog = new PromotionWindow(CurrentPiece.IsWhite);
                     if (dialog.ShowDialog() == true)
@@ -95,8 +95,19 @@ namespace ChessMaster.ViewModel
                 List<Point> possibleMoves = CurrentPiece.GetPossibleMoves(ToBasePieceList());
                 foreach (Point p in possibleMoves)
                 {
-                    index = (int)p.Y * 8 + (int)p.X;
-                    Board[index].BorderColor = new SolidColorBrush(Colors.Red);
+                    if (CurrentPiece is King)
+                    {
+                        if (!IsAttacked(p))
+                        {
+                            index = (int)p.Y * 8 + (int)p.X;
+                            Board[index].BorderColor = new SolidColorBrush(Colors.Red);
+                        }
+                    }
+                    else
+                    {
+                        index = (int)p.Y * 8 + (int)p.X;
+                        Board[index].BorderColor = new SolidColorBrush(Colors.Red);
+                    }
                 }
             }
             else if (CurrentPiece != null && CurrentPiece != Board[index].Piece)
@@ -107,8 +118,20 @@ namespace ChessMaster.ViewModel
                 List<Point> possibleMoves = CurrentPiece.GetPossibleMoves(ToBasePieceList());
                 foreach (Point p in possibleMoves)
                 {
-                    index = (int)p.Y * 8 + (int)p.X;
-                    Board[index].BorderColor = new SolidColorBrush(Colors.Red);
+                    if(CurrentPiece is King)
+                    {
+                        if (!IsAttacked(p))
+                        {
+                            index = (int)p.Y * 8 + (int)p.X;
+                            Board[index].BorderColor = new SolidColorBrush(Colors.Red);
+                        }
+                    }                   
+                    else
+                    {
+                        index = (int)p.Y * 8 + (int)p.X;
+                        Board[index].BorderColor = new SolidColorBrush(Colors.Red);
+                    }
+
                 }
             }
         }
@@ -124,6 +147,24 @@ namespace ChessMaster.ViewModel
         public List<BasePiece> ToBasePieceList()
         {
             return Board.Select(b => b.Piece).ToList();
+        }
+        public bool IsAttacked(Point p)
+        {
+            int index = (int)p.Y * 8 + (int)p.X;
+            foreach(ChessCell square in Board)
+            {
+                if(square.Piece != null && square.Piece.IsWhite != CurrentPiece.IsWhite)
+                {
+                    foreach(Point attackedSquare in square.Piece.GetPossibleMoves(ToBasePieceList()))
+                    {
+                        if (attackedSquare.Equals(p))
+                        {
+                             return true;
+                        }                                                
+                    }
+                }
+            }
+            return false;
         }
             
     }
