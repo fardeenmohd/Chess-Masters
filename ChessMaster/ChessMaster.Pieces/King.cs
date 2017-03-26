@@ -24,7 +24,12 @@ namespace ChessMaster.Pieces
         public override List<Point> GetPossibleMoves(List<BasePiece> board)
         {
             //by default move length is 1
-            return GetDiagonalMoves(board).Union(GetHorizontalMoves(board)).Union(GetVerticalMoves(board)).ToList();
+            return GetDiagonalMoves(AddMove, board).Union(GetHorizontalMoves(AddMove, board)).Union(GetVerticalMoves(AddMove, board)).ToList();
+        }
+
+        public override List<Point> GetCellsUnderAttack(List<BasePiece> board)
+        {
+            return GetDiagonalMoves(AddCellUnderAttack, board).Union(GetHorizontalMoves(AddCellUnderAttack, board)).Union(GetVerticalMoves(AddCellUnderAttack, board)).ToList();
         }
     }
 }

@@ -148,23 +148,14 @@ namespace ChessMaster.ViewModel
         {
             return Board.Select(b => b.Piece).ToList();
         }
+
         public bool IsAttacked(Point p)
         {
             int index = (int)p.Y * 8 + (int)p.X;
-            foreach(ChessCell square in Board)
-            {
-                if(square.Piece != null && square.Piece.IsWhite != CurrentPiece.IsWhite)
-                {
-                    foreach(Point attackedSquare in square.Piece.GetPossibleMoves(ToBasePieceList()))
-                    {
-                        if (attackedSquare.Equals(p))
-                        {
-                             return true;
-                        }                                                
-                    }
-                }
-            }
-            return false;
+
+            var cellsUnderAttack = Board.Where(cell => cell.Piece != null && cell.Piece.IsWhite != CurrentPiece.IsWhite)
+                                .SelectMany(cell => cell.Piece.GetCellsUnderAttack(ToBasePieceList()));
+            return cellsUnderAttack.Contains(p);
         }
             
     }

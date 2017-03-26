@@ -20,11 +20,16 @@ namespace ChessMaster.Pieces
             {
                 PieceImage = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "../../Images/black_bishop.png");
             }
-
         }
+
         public override List<Point> GetPossibleMoves(List<BasePiece> board)
         {
-            return base.GetDiagonalMoves(board, BOARDLENGTH);
+            return base.GetDiagonalMoves(AddMove, board, BOARDLENGTH);
+        }
+
+        public override List<Point> GetCellsUnderAttack(List<BasePiece> board)
+        {
+            return GetDiagonalMoves(AddCellUnderAttack, board, BOARDLENGTH);
         }
     }
 }
