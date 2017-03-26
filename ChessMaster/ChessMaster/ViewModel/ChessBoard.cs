@@ -165,24 +165,27 @@ namespace ChessMaster.ViewModel
             }
             else
             {
-                //Putting the piece back to the previous square
-                Board[ActualLastIndex].Piece = ActualLastPiece;
-                Board[ActualLastIndex].Position = ActualLastPiece.Position;
-                CurrentPiece = CopyPiece(ActualLastPiece);
-                CurrentPiece.Position = ActualLastPiece.Position;
-                //Handling of the square we moved back from
-                if (ActualLastTakenPiece != null)
+                if(ActualLastPiece != null)
                 {
-                    Board[ActualLastMoveIndex].Piece = ActualLastTakenPiece;
-                    Board[ActualLastMoveIndex].Position = ActualLastTakenPiece.Position;
-                }
-                else
-                {
-                    Board[ActualLastMoveIndex].Piece = null;
-                }
+                    //Putting the piece back to the previous square
+                    Board[ActualLastIndex].Piece = ActualLastPiece;
+                    Board[ActualLastIndex].Position = ActualLastPiece.Position;
+                    CurrentPiece = CopyPiece(ActualLastPiece);
+                    CurrentPiece.Position = ActualLastPiece.Position;
+                    //Handling of the square we moved back from
+                    if (ActualLastTakenPiece != null)
+                    {
+                        Board[ActualLastMoveIndex].Piece = ActualLastTakenPiece;
+                        Board[ActualLastMoveIndex].Position = ActualLastTakenPiece.Position;
+                    }
+                    else
+                    {
+                        Board[ActualLastMoveIndex].Piece = null;
+                    }
 
-                ActualLastTakenPiece = null;
-                ActualLastPiece = null;
+                    ActualLastTakenPiece = null;
+                    ActualLastPiece = null;
+                }              
             }
             
         }
