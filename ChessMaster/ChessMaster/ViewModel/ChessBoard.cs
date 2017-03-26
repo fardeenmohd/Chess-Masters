@@ -191,24 +191,22 @@ namespace ChessMaster.ViewModel
         }
         public void ShowPossibleMoves(int index)
         {
-            if (CurrentPiece == null)
+            if (ActualCurrentPiece == null)
             {
-                CurrentPiece = Board[index].Piece;
+                ActualCurrentPiece = Board[index].Piece;
                 ActualLastIndex = index;
-                List<Point> possibleMoves = CurrentPiece.GetPossibleMoves(ToBasePieceList());
-                foreach (Point p in GetOnlyLegalMoves(CurrentPiece))
+                foreach (Point p in GetOnlyLegalMoves(ActualCurrentPiece))
                 {
                     int moveIndex = (int)p.Y * 8 + (int)p.X;
                     Board[moveIndex].BorderColor = new SolidColorBrush(Colors.Red);
                 }
             }
-            else if (CurrentPiece != null && CurrentPiece != Board[index].Piece)
+            else if (ActualCurrentPiece != null && ActualCurrentPiece != Board[index].Piece)
             {
                 AssignCellBlackBorder();
-                CurrentPiece = Board[index].Piece;
+                ActualCurrentPiece = Board[index].Piece;
                 ActualLastIndex = index;
-                List<Point> possibleMoves = CurrentPiece.GetPossibleMoves(ToBasePieceList());
-                foreach (Point p in GetOnlyLegalMoves(CurrentPiece))
+                foreach (Point p in GetOnlyLegalMoves(ActualCurrentPiece))
                 {
                     int moveIndex = (int)p.Y * 8 + (int)p.X;
                     Board[moveIndex].BorderColor = new SolidColorBrush(Colors.Red);
