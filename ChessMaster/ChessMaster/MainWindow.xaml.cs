@@ -156,7 +156,7 @@ namespace ChessMaster
 
         public void ExecuteUnmakeMoveCommand(object obj)
         {
-            ChessBoard.UnmakeLastMove();
+            ChessBoard.UnmakeLastMove(false);
             _isWhiteMove = !_isWhiteMove;
             Cells = new List<ChessCell>(ChessBoard.Board); // This updates the GUI
         }
