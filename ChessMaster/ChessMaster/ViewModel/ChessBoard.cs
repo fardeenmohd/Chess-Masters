@@ -213,6 +213,7 @@ namespace ChessMaster.ViewModel
                 }
             }
         }
+
         /// <summary>
         /// Returns a list of legal moves based on possibleMoves
         /// </summary>
@@ -235,6 +236,7 @@ namespace ChessMaster.ViewModel
             }
             return legalMoves;
         }
+
         /// <summary>
         /// Creates a new object of type piece identical to "bp" in order to avoid referencing the same piece in the code, which causes unwanted behavior and conflicts
         /// </summary>
@@ -242,7 +244,10 @@ namespace ChessMaster.ViewModel
         public BasePiece CopyPiece(BasePiece bp)
         {
             if (bp is Pawn)
-                return new Pawn((int)bp.Position.X, (int)bp.Position.Y, bp.IsWhite);
+                return new Pawn((int)bp.Position.X, (int)bp.Position.Y, bp.IsWhite)
+                {
+                    IsFirstMove = bp.IsFirstMove
+                };
             if (bp is Knight)
                 return new Knight((int)bp.Position.X, (int)bp.Position.Y, bp.IsWhite);
             if (bp is Bishop)
@@ -268,7 +273,6 @@ namespace ChessMaster.ViewModel
             }
         }
 
-        //TODO this does not work yet
         public bool IsGameOver(bool isWhite)
         {
             foreach (ChessCell c in Board)
@@ -280,7 +284,6 @@ namespace ChessMaster.ViewModel
                         return false;
                     }
                 }
-
             }
             return true;
         }
@@ -291,21 +294,9 @@ namespace ChessMaster.ViewModel
         public bool IsAttacked(Point p, bool isWhite)
         {
             int index = (int)p.Y * 8 + (int)p.X;
-            foreach (ChessCell square in Board)
-            {
-                if (square.Piece != null && square.Piece.IsWhite != isWhite)
-                {
-                    foreach (Point attackedSquare in square.Piece.GetPossibleMoves(ToBasePieceList()))
-                    {
-                        if (attackedSquare.Equals(p))
-                        {
-                            return true;
-                        }
-                    }
-                }
-            }
-            return false;
+            var cellsUnderAttack = Board.Where(cell => cell.Piece != null && cell.Piece.IsWhite != isWhite)
+                                .SelectMany(cell => cell.Piece.GetPossibleMoves(ToBasePieceList()));
+            return cellsUnderAttack.Contains(p);
         }
-
     }
 }

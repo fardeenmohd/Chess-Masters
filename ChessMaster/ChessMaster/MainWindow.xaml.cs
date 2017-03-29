@@ -70,7 +70,8 @@ namespace ChessMaster
 
         private DispatcherTimer _commonTimer { get; set; }
 
-        public bool _isWhiteMove; 
+        private bool _isWhiteMove;
+        private bool _canMakeUndoMove;
 
         public ChessBoard ChessBoard;
 
@@ -87,7 +88,7 @@ namespace ChessMaster
         public RelayCommand NewGameAgainstAICommand => _newGameAgainstAICommand ?? (_newGameAgainstAICommand = new RelayCommand(ExecuteNewGameAgainstAICommand));
         public RelayCommand NewGameAgainstHumanCommand => _newGameAgainstHumanCommand ?? (_newGameAgainstHumanCommand = new RelayCommand(ExecuteNewGameAgainstHumanCommand));
         public RelayCommand CellCommand => _cellCommand ?? (_cellCommand = new RelayCommand(ExecuteCellCommand));
-        public RelayCommand UnmakeMoveCommand => _unmakeMoveCommand ?? (_unmakeMoveCommand = new RelayCommand(ExecuteUnmakeMoveCommand));
+        public RelayCommand UnmakeMoveCommand => _unmakeMoveCommand ?? (_unmakeMoveCommand = new RelayCommand(ExecuteUnmakeMoveCommand, CanExecuteUnmakeMoveCommand));
         
         #endregion
 
@@ -145,6 +146,7 @@ namespace ChessMaster
                 {
                     ChessBoard.MakeMove(index, false);
                     _isWhiteMove = !_isWhiteMove;
+                    _canMakeUndoMove = true;
                 }
                 else if (Cells[index].Piece != null && Cells[index].Piece.IsWhite == _isWhiteMove)
                 {
@@ -159,8 +161,13 @@ namespace ChessMaster
             ChessBoard.UnmakeLastMove(false);
             _isWhiteMove = !_isWhiteMove;
             Cells = new List<ChessCell>(ChessBoard.Board); // This updates the GUI
+            _canMakeUndoMove = false;
         }
 
+        public bool CanExecuteUnmakeMoveCommand(object obj)
+        {
+            return _canMakeUndoMove;
+        }
         public void OnPropertyChanged(string propertyName)
         {
             PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
