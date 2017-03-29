@@ -21,5 +21,6 @@ namespace ChessMaster.ViewModel
         public SolidColorBrush BorderColor { get; set; }
 
         public BasePiece Piece { get; set; }
+      
     }
 }

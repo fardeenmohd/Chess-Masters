@@ -16,6 +16,8 @@ using ChessMaster.Pieces;
 using ChessMaster.AI;
 using ChessMaster.ViewModel;
 using System.ComponentModel;
+using ChessMaster.Dialogs;
+using System.Windows.Threading;
 
 
 namespace ChessMaster
@@ -28,7 +30,28 @@ namespace ChessMaster
     { 
         #region BindableProperties
         private List<ChessCell> _cells;
+        private TimeSpan _blackSideTime;
+        private TimeSpan _whiteSideTime;
 
+
+        public TimeSpan BlackSideTime
+        {
+            get { return _blackSideTime; }
+            set
+            {
+                _blackSideTime = value;
+                OnPropertyChanged(nameof(BlackSideTime));
+            }
+        }
+        public TimeSpan WhiteSideTime
+        {
+            get { return _whiteSideTime; }
+            set
+            {
+                _whiteSideTime = value;
+                OnPropertyChanged(nameof(WhiteSideTime));
+            }
+        }
         public List<int> Numbers { get; set; }
         public List<char> Letters { get; set; }
         public List<ChessCell> Cells
@@ -45,9 +68,9 @@ namespace ChessMaster
         }
         #endregion
 
-        public BasePiece CurrentPiece;
+        private DispatcherTimer _commonTimer { get; set; }
 
-        public int LastIndex;
+        public bool _isWhiteMove; 
 
         public ChessBoard ChessBoard;
 
@@ -55,17 +78,23 @@ namespace ChessMaster
 
         #region Commands
         private RelayCommand _exitCommand;
-        private RelayCommand _newGameCommand;
+        private RelayCommand _newGameAgainstAICommand;
+        private RelayCommand _newGameAgainstHumanCommand;
         private RelayCommand _cellCommand;
+        private RelayCommand _unmakeMoveCommand;
 
         public RelayCommand ExitCommand => _exitCommand ?? (_exitCommand = new RelayCommand(ExecuteExitCommand));
-        public RelayCommand NewGameCommand => _newGameCommand ?? (_newGameCommand = new RelayCommand(ExecuteNewGameCommand, CanExecuteNewGameCommand));
+        public RelayCommand NewGameAgainstAICommand => _newGameAgainstAICommand ?? (_newGameAgainstAICommand = new RelayCommand(ExecuteNewGameAgainstAICommand));
+        public RelayCommand NewGameAgainstHumanCommand => _newGameAgainstHumanCommand ?? (_newGameAgainstHumanCommand = new RelayCommand(ExecuteNewGameAgainstHumanCommand));
         public RelayCommand CellCommand => _cellCommand ?? (_cellCommand = new RelayCommand(ExecuteCellCommand));
+        public RelayCommand UnmakeMoveCommand => _unmakeMoveCommand ?? (_unmakeMoveCommand = new RelayCommand(ExecuteUnmakeMoveCommand));
+        
         #endregion
 
         public MainWindow()
         {
             InitializeLists();
+            InitializeTimers();
             InitializeComponent();
             DataContext = this;
         }
@@ -76,12 +105,15 @@ namespace ChessMaster
             Letters = new List<char> { 'a', 'b', 'c', 'd', 'e', 'f', 'g', 'h' };
             ChessBoard = new ChessBoard();
             Cells = ChessBoard.Board;
-           
+            _isWhiteMove = true;        
         }
 
-        public bool CanExecuteNewGameCommand(object obj)
+        private void InitializeTimers()
         {
-            return false;
+            _commonTimer = new DispatcherTimer();
+            _commonTimer.Interval = new TimeSpan(0, 0, 1);
+            _commonTimer.Tick += new EventHandler(Each_Tick);
+            _commonTimer.Start();
         }
 
         public void ExecuteExitCommand(object obj)
@@ -89,23 +121,32 @@ namespace ChessMaster
             Close();
         }
 
-        public void ExecuteNewGameCommand(object obj)
+        public void ExecuteNewGameAgainstHumanCommand(object obj)
         {
-            //TODO
+            ChessBoard = new ChessBoard();
+            Cells = ChessBoard.Board;
+            WhiteSideTime = new TimeSpan();
+            BlackSideTime = new TimeSpan();
+            _isWhiteMove = true;
+        }
+
+        public void ExecuteNewGameAgainstAICommand(object obj)
+        {
+            MessageBox.Show("You are not ready to face with superior machine!", "Human vs AI game", MessageBoxButton.OK, MessageBoxImage.Stop);
         }
 
         public void ExecuteCellCommand(object obj)
         {
-            //MessageBox.Show("Current Position: " + (Point)obj);
             if (obj != null)
             {
                 Point currentPosition = (Point)obj;
                 int index = (int)currentPosition.Y * 8 + (int)currentPosition.X;
                 if (Cells[index].BorderColor.Color == Colors.Red)
                 {
-                    ChessBoard.MakeMove(index);
+                    ChessBoard.MakeMove(index, false);
+                    _isWhiteMove = !_isWhiteMove;
                 }
-                else if (Cells[index].Piece != null && Cells[index].Piece.IsWhite)
+                else if (Cells[index].Piece != null && Cells[index].Piece.IsWhite == _isWhiteMove)
                 {
                     ChessBoard.ShowPossibleMoves(index);
                 }
@@ -113,9 +154,24 @@ namespace ChessMaster
             }
         }
 
+        public void ExecuteUnmakeMoveCommand(object obj)
+        {
+            ChessBoard.UnmakeLastMove(false);
+            _isWhiteMove = !_isWhiteMove;
+            Cells = new List<ChessCell>(ChessBoard.Board); // This updates the GUI
+        }
+
         public void OnPropertyChanged(string propertyName)
         {
             PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
         }
+
+        public void Each_Tick(object o, EventArgs sender)
+        {
+            if (_isWhiteMove)
+                WhiteSideTime = WhiteSideTime.Add(new TimeSpan(0, 0, 1));
+            else
+                BlackSideTime = BlackSideTime.Add(new TimeSpan(0, 0, 1));
+        }       
     }
 }

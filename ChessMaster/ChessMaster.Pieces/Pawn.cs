@@ -23,7 +23,7 @@ namespace ChessMaster.Pieces
         }
         public override List<Point> GetPossibleMoves(List<BasePiece> board)
         {
-            return GetPawnMoves(board, IsFirstMove);
+            return GetPawnMoves(board, IsFirstMove, IsWhite);
         }
     }
 }
