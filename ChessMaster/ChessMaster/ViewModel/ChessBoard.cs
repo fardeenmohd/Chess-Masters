@@ -258,14 +258,7 @@ namespace ChessMaster.ViewModel
         }
         public Point FindKingLocation(bool isWhite)
         {
-            foreach (ChessCell c in Board)
-            {
-                if (c.Piece is King && c.Piece.IsWhite == isWhite)
-                {
-                    return c.Piece.Position;
-                }
-            }
-            return new Point(); // we should not reach this return statement, it means there is no king on the board
+            return Board.Find(p => p.Piece is King && p.Piece.IsWhite == isWhite).Position;      
         }
         protected void AssignCellBlackBorder()
         {
