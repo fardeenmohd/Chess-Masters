@@ -32,6 +32,7 @@ namespace ChessMaster.ViewModel
 
         public int ActualLastMoveIndex = 0;
 
+        public bool DisableUnmakeMove = false;
 
         public List<ChessCell> Board;
 
@@ -125,6 +126,7 @@ namespace ChessMaster.ViewModel
                     Board[LastIndex].Piece = null;
                     bool isWhite = CurrentPiece.IsWhite;
                     CurrentPiece = null;
+                    DisableUnmakeMove = false;
                     if (IsGameOver(!isWhite))
                     {
                         MessageBox.Show("Game over! " + (isWhite ? "White" : "Black") + " wins!");
@@ -165,7 +167,7 @@ namespace ChessMaster.ViewModel
             }
             else
             {
-                if(ActualLastPiece != null)
+                if(ActualLastPiece != null && !DisableUnmakeMove)
                 {
                     //Putting the piece back to the previous square
                     Board[ActualLastIndex].Piece = ActualLastPiece;
@@ -195,6 +197,7 @@ namespace ChessMaster.ViewModel
             {
                 ActualCurrentPiece = Board[index].Piece;
                 ActualLastIndex = index;
+                DisableUnmakeMove = true;
                 foreach (Point p in GetOnlyLegalMoves(ActualCurrentPiece))
                 {
                     int moveIndex = (int)p.Y * 8 + (int)p.X;
@@ -206,6 +209,7 @@ namespace ChessMaster.ViewModel
                 AssignCellBlackBorder();
                 ActualCurrentPiece = Board[index].Piece;
                 ActualLastIndex = index;
+                DisableUnmakeMove = true;
                 foreach (Point p in GetOnlyLegalMoves(ActualCurrentPiece))
                 {
                     int moveIndex = (int)p.Y * 8 + (int)p.X;

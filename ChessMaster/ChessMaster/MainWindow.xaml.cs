@@ -88,7 +88,7 @@ namespace ChessMaster
         public RelayCommand NewGameAgainstAICommand => _newGameAgainstAICommand ?? (_newGameAgainstAICommand = new RelayCommand(ExecuteNewGameAgainstAICommand));
         public RelayCommand NewGameAgainstHumanCommand => _newGameAgainstHumanCommand ?? (_newGameAgainstHumanCommand = new RelayCommand(ExecuteNewGameAgainstHumanCommand));
         public RelayCommand CellCommand => _cellCommand ?? (_cellCommand = new RelayCommand(ExecuteCellCommand));
-        public RelayCommand UnmakeMoveCommand => _unmakeMoveCommand ?? (_unmakeMoveCommand = new RelayCommand(ExecuteUnmakeMoveCommand, CanExecuteUnmakeMoveCommand));
+        public RelayCommand UnmakeMoveCommand => _unmakeMoveCommand ?? (_unmakeMoveCommand = new RelayCommand(ExecuteUnmakeMoveCommand));
         
         #endregion
 
@@ -158,10 +158,13 @@ namespace ChessMaster
 
         public void ExecuteUnmakeMoveCommand(object obj)
         {
-            ChessBoard.UnmakeLastMove(false);
-            _isWhiteMove = !_isWhiteMove;
-            Cells = new List<ChessCell>(ChessBoard.Board); // This updates the GUI
-            _canMakeUndoMove = false;
+            if(!ChessBoard.DisableUnmakeMove)
+            {
+                ChessBoard.UnmakeLastMove(false);
+                _isWhiteMove = !_isWhiteMove;
+                Cells = new List<ChessCell>(ChessBoard.Board); // This updates the GUI
+                _canMakeUndoMove = false;
+            }       
         }
 
         public bool CanExecuteUnmakeMoveCommand(object obj)
