@@ -14,27 +14,13 @@ namespace ChessMaster.ViewModel
     {
         public BasePiece CurrentPiece = null;
 
-        public BasePiece LastPiece = null;
-
-        public BasePiece LastTakenPiece = null;
-
         public int LastIndex = 0;
 
-        public int LastMoveIndex = 0; //The index of the last place we moved to, so we can UnmakeMove()
-
-        public BasePiece ActualCurrentPiece = null;
-
-        public int ActualLastIndex = 0;
-
-        public BasePiece ActualLastTakenPiece = null;
-
-        public BasePiece ActualLastPiece = null;
-
-        public int ActualLastMoveIndex = 0;
-
-        public bool DisableUnmakeMove = false;
-
         public List<ChessCell> Board;
+
+        public List<Move> HistoryOfMoves;
+
+        public bool GameFinished = false;
 
         public ChessBoard()
         {
@@ -49,6 +35,7 @@ namespace ChessMaster.ViewModel
                                 new King(4,7), new Bishop(5,7),
                                 new Knight(6,7), new Rook(7,7)};
             Board = new List<ChessCell>();
+            HistoryOfMoves = new List<Move>();
             for (int y = 0; y < 8; y++)
             {
                 for (int x = 0; x < 8; x++)
@@ -60,157 +47,98 @@ namespace ChessMaster.ViewModel
                         Position = new Point(x, y)
                     };
                     if (y == 0)
-                    {
                         c.Piece = blackPieces[x];
-                    }
                     else if (y == 1)
-                    {
                         //black pawns
                         c.Piece = new Pawn(x, y, false);
-                    }
                     else if (y == 6)
-                    {
                         //white pawns
                         c.Piece = new Pawn(x, y);
-                    }
                     else if (y == 7)
-                    {
                         c.Piece = whitePieces[x];
-                    }
                     Board.Add(c);
                 }
             }
         }
+
         /// <summary>
-        /// Makes a move on chess board. If searchingForMove is true, it means we are using this method to simply check for legal moves
-        /// instead of actually trying to move
-        /// If it is false, the move will be shown on the board and we check for game over
+        /// Makes a move on chess board
         /// </summary>
         /// <returns></returns>
-        public void MakeMove(int index, bool searchingForMove = true)
+        public void MakeMove(int index)
         {           
             if (CurrentPiece != null)
             {
                 AssignCellBlackBorder();
-                if(searchingForMove)
-                {
-                    if (CurrentPiece is Pawn && (Board[index].Position.Y == 0 || Board[index].Position.Y == 7))
-                    {
-                        //TODO somehow all possible pawn promotions should be searched for
-                    }
-                    LastPiece = CopyPiece(CurrentPiece);
-                    CurrentPiece.Position = Board[index].Position;
-                    CurrentPiece.IsFirstMove = false;
-                    LastTakenPiece = (Board[index].Piece == null ? null : CopyPiece(Board[index].Piece));
-                    LastMoveIndex = index;
-                    Board[index].Piece = CurrentPiece;
-                    Board[LastIndex].Piece = null;
-                    CurrentPiece = null;
-                }                               
+                BasePiece takenPiece = (Board[index].Piece == null ? null : CopyPiece(Board[index].Piece));
+                Move madeMove;
+                if (takenPiece == null)
+                    madeMove = new Move(LastIndex, index, CopyPiece(CurrentPiece));
                 else
+                    madeMove = new Move(LastIndex, index, CopyPiece(CurrentPiece), takenPiece);
+                HistoryOfMoves.Add(madeMove);
+                if (CurrentPiece is Pawn && (Board[index].Position.Y == 0 || Board[index].Position.Y == 7))
                 {
-                    if (CurrentPiece is Pawn && (Board[index].Position.Y == 0 || Board[index].Position.Y == 7))
+                    PromotionWindow dialog = new PromotionWindow(CurrentPiece.IsWhite);
+                    if (dialog.ShowDialog() == true)
                     {
-                        PromotionWindow dialog = new PromotionWindow(CurrentPiece.IsWhite);
-                        if (dialog.ShowDialog() == true)
-                        {
-                            CurrentPiece = dialog.SelectedPiece;
-                        }
-                    }
-                    ActualLastPiece = CopyPiece(CurrentPiece);
-                    CurrentPiece.Position = Board[index].Position;
-                    CurrentPiece.IsFirstMove = false;
-                    ActualLastTakenPiece = (Board[index].Piece == null ? null : CopyPiece(Board[index].Piece));
-                    ActualLastMoveIndex = index;
-                    Board[index].Piece = CurrentPiece;
-                    Board[LastIndex].Piece = null;
-                    bool isWhite = CurrentPiece.IsWhite;
-                    CurrentPiece = null;
-                    DisableUnmakeMove = false;
-                    if (IsGameOver(!isWhite))
-                    {
-                        MessageBox.Show("Game over! " + (isWhite ? "White" : "Black") + " wins!");
+                        CurrentPiece = dialog.SelectedPiece;
                     }
                 }
-                
+                bool isWhite = CurrentPiece.IsWhite;
+                CurrentPiece.Position = Board[index].Position;
+                CurrentPiece.IsFirstMove = false;
+                Board[index].Piece = CurrentPiece;
+                Board[LastIndex].Piece = null;
+                LastIndex = 0;
+                CurrentPiece = null;
+                if (IsGameOver(!isWhite))
+                {
+                    MessageBox.Show("Game over! " + (isWhite ? "White" : "Black") + " wins!");
+                    GameFinished = true;
+                }
             }
         }
-        /// <summary>
-        /// Unmakes the last move and sets CurrentPiece back to its previous value
-        /// </summary>
-        /// <returns></returns>
-        public void UnmakeLastMove(bool searchingForMove=true)
+
+        public void MakeFakeMove(int index)
         {
-            if(searchingForMove)
-            {
-                if (LastPiece != null)
-                {
-                    //Putting the piece back to the previous square
-                    Board[LastIndex].Piece = LastPiece;
-                    Board[LastIndex].Position = LastPiece.Position;
-                    CurrentPiece = CopyPiece(LastPiece);
-                    CurrentPiece.Position = LastPiece.Position;
-                    //Handling of the square we moved back from
-                    if (LastTakenPiece != null)
-                    {
-                        Board[LastMoveIndex].Piece = LastTakenPiece;
-                        Board[LastMoveIndex].Position = LastTakenPiece.Position;
-                    }
-                    else
-                    {
-                        Board[LastMoveIndex].Piece = null;
-                    }
-
-                    LastTakenPiece = null;
-                    LastPiece = null;
-                }
-            }
+            BasePiece takenPiece = (Board[index].Piece == null ? null : CopyPiece(Board[index].Piece));
+            Move madeMove;
+            if (takenPiece == null)
+                madeMove = new Move(LastIndex, index, CopyPiece(CurrentPiece));
             else
-            {
-                if(ActualLastPiece != null && !DisableUnmakeMove)
-                {
-                    //Putting the piece back to the previous square
-                    Board[ActualLastIndex].Piece = ActualLastPiece;
-                    Board[ActualLastIndex].Position = ActualLastPiece.Position;
-                    CurrentPiece = CopyPiece(ActualLastPiece);
-                    CurrentPiece.Position = ActualLastPiece.Position;
-                    //Handling of the square we moved back from
-                    if (ActualLastTakenPiece != null)
-                    {
-                        Board[ActualLastMoveIndex].Piece = ActualLastTakenPiece;
-                        Board[ActualLastMoveIndex].Position = ActualLastTakenPiece.Position;
-                    }
-                    else
-                    {
-                        Board[ActualLastMoveIndex].Piece = null;
-                    }
-
-                    ActualLastTakenPiece = null;
-                    ActualLastPiece = null;
-                }              
-            }
-            
+                madeMove = new Move(LastIndex, index, CopyPiece(CurrentPiece), takenPiece);
+            HistoryOfMoves.Add(madeMove);
+            CurrentPiece.Position = Board[index].Position;
+            Board[index].Piece = CurrentPiece;
+            Board[LastIndex].Piece = null;
         }
+
+        public void UnMakeLastMove()
+        {
+            AssignCellBlackBorder();
+            HistoryOfMoves[HistoryOfMoves.Count - 1].UnMakeMove(ref Board);
+            HistoryOfMoves.RemoveAt(HistoryOfMoves.Count - 1);
+        }
+
         public void ShowPossibleMoves(int index)
         {
-            if (ActualCurrentPiece == null)
+            if (CurrentPiece == null)
             {
-                ActualCurrentPiece = Board[index].Piece;
-                ActualLastIndex = index;
-                DisableUnmakeMove = true;
-                foreach (Point p in GetOnlyLegalMoves(ActualCurrentPiece))
+                CurrentPiece = Board[index].Piece;
+                LastIndex = index;
+                foreach (Point p in GetOnlyLegalMoves(CurrentPiece))
                 {
                     int moveIndex = (int)p.Y * 8 + (int)p.X;
                     Board[moveIndex].BorderColor = new SolidColorBrush(Colors.Red);
                 }
             }
-            else if (ActualCurrentPiece != null && ActualCurrentPiece != Board[index].Piece)
+            else if (CurrentPiece != null && CurrentPiece != Board[index].Piece)
             {
                 AssignCellBlackBorder();
-                ActualCurrentPiece = Board[index].Piece;
-                ActualLastIndex = index;
-                DisableUnmakeMove = true;
-                foreach (Point p in GetOnlyLegalMoves(ActualCurrentPiece))
+                CurrentPiece = Board[index].Piece;
+                LastIndex = index;
+                foreach (Point p in GetOnlyLegalMoves(CurrentPiece))
                 {
                     int moveIndex = (int)p.Y * 8 + (int)p.X;
                     Board[moveIndex].BorderColor = new SolidColorBrush(Colors.Red);
@@ -230,13 +158,13 @@ namespace ChessMaster.ViewModel
             LastIndex = (int)pieceToBeChecked.Position.Y * 8 + (int)pieceToBeChecked.Position.X;
             foreach (Point p in possibleMoves)
             {
-                MakeMove((int)(p.Y * 8 + p.X));
+                MakeFakeMove((int)(p.Y * 8 + p.X));
                 Point kingLocation = FindKingLocation(pieceToBeChecked.IsWhite);
                 if (!IsAttacked(kingLocation, pieceToBeChecked.IsWhite))
                 {
                     legalMoves.Add(p);
                 }
-                UnmakeLastMove();
+                UnMakeLastMove();
             }
             return legalMoves;
         }
@@ -262,13 +190,14 @@ namespace ChessMaster.ViewModel
                 return new Queen((int)bp.Position.X, (int)bp.Position.Y, bp.IsWhite);
             if (bp is King)
                 return new King((int)bp.Position.X, (int)bp.Position.Y, bp.IsWhite);
-
             return null;
         }
+
         public Point FindKingLocation(bool isWhite)
         {
             return Board.Find(p => p.Piece is King && p.Piece.IsWhite == isWhite).Position;      
         }
+        
         protected void AssignCellBlackBorder()
         {
             foreach (var cell in Board)
@@ -291,10 +220,12 @@ namespace ChessMaster.ViewModel
             }
             return true;
         }
+
         public List<BasePiece> ToBasePieceList()
         {
             return Board.Select(b => b.Piece).ToList();
         }
+
         public bool IsAttacked(Point p, bool isWhite)
         {
             int index = (int)p.Y * 8 + (int)p.X;

@@ -32,7 +32,28 @@ namespace ChessMaster
         private List<ChessCell> _cells;
         private TimeSpan _blackSideTime;
         private TimeSpan _whiteSideTime;
+        private SolidColorBrush _blackSideBorderColor;
+        private SolidColorBrush _whiteSideBorderColor;
 
+        public SolidColorBrush BlackSideBorderColor
+        {
+            get { return _blackSideBorderColor; }
+            set
+            {
+                _blackSideBorderColor = value;
+                OnPropertyChanged(nameof(BlackSideBorderColor));
+            }
+        }
+
+        public SolidColorBrush WhiteSideBorderColor
+        {
+            get { return _whiteSideBorderColor; }
+            set
+            {
+                _whiteSideBorderColor = value;
+                OnPropertyChanged(nameof(WhiteSideBorderColor));
+            }
+        }
 
         public TimeSpan BlackSideTime
         {
@@ -71,7 +92,6 @@ namespace ChessMaster
         private DispatcherTimer _commonTimer { get; set; }
 
         private bool _isWhiteMove;
-        private bool _canMakeUndoMove;
 
         public ChessBoard ChessBoard;
 
@@ -88,7 +108,7 @@ namespace ChessMaster
         public RelayCommand NewGameAgainstAICommand => _newGameAgainstAICommand ?? (_newGameAgainstAICommand = new RelayCommand(ExecuteNewGameAgainstAICommand));
         public RelayCommand NewGameAgainstHumanCommand => _newGameAgainstHumanCommand ?? (_newGameAgainstHumanCommand = new RelayCommand(ExecuteNewGameAgainstHumanCommand));
         public RelayCommand CellCommand => _cellCommand ?? (_cellCommand = new RelayCommand(ExecuteCellCommand));
-        public RelayCommand UnmakeMoveCommand => _unmakeMoveCommand ?? (_unmakeMoveCommand = new RelayCommand(ExecuteUnmakeMoveCommand));
+        public RelayCommand UnmakeMoveCommand => _unmakeMoveCommand ?? (_unmakeMoveCommand = new RelayCommand(ExecuteUnmakeMoveCommand, CanExecuteUnmakeMoveCommand));
         
         #endregion
 
@@ -106,7 +126,8 @@ namespace ChessMaster
             Letters = new List<char> { 'a', 'b', 'c', 'd', 'e', 'f', 'g', 'h' };
             ChessBoard = new ChessBoard();
             Cells = ChessBoard.Board;
-            _isWhiteMove = true;        
+            _isWhiteMove = true;
+            ChangeTimersBorderColor();      
         }
 
         private void InitializeTimers()
@@ -129,6 +150,7 @@ namespace ChessMaster
             WhiteSideTime = new TimeSpan();
             BlackSideTime = new TimeSpan();
             _isWhiteMove = true;
+            ChangeTimersBorderColor();
         }
 
         public void ExecuteNewGameAgainstAICommand(object obj)
@@ -138,15 +160,15 @@ namespace ChessMaster
 
         public void ExecuteCellCommand(object obj)
         {
-            if (obj != null)
+            if (obj != null && !ChessBoard.GameFinished)
             {
                 Point currentPosition = (Point)obj;
                 int index = (int)currentPosition.Y * 8 + (int)currentPosition.X;
                 if (Cells[index].BorderColor.Color == Colors.Red)
                 {
-                    ChessBoard.MakeMove(index, false);
+                    ChessBoard.MakeMove(index);
                     _isWhiteMove = !_isWhiteMove;
-                    _canMakeUndoMove = true;
+                    ChangeTimersBorderColor();
                 }
                 else if (Cells[index].Piece != null && Cells[index].Piece.IsWhite == _isWhiteMove)
                 {
@@ -158,19 +180,17 @@ namespace ChessMaster
 
         public void ExecuteUnmakeMoveCommand(object obj)
         {
-            if(!ChessBoard.DisableUnmakeMove)
-            {
-                ChessBoard.UnmakeLastMove(false);
-                _isWhiteMove = !_isWhiteMove;
-                Cells = new List<ChessCell>(ChessBoard.Board); // This updates the GUI
-                _canMakeUndoMove = false;
-            }       
+            ChessBoard.UnMakeLastMove();
+            _isWhiteMove = !_isWhiteMove;
+            ChangeTimersBorderColor();
+            Cells = new List<ChessCell>(ChessBoard.Board); // This updates the GUI
         }
 
         public bool CanExecuteUnmakeMoveCommand(object obj)
         {
-            return _canMakeUndoMove;
+            return ChessBoard.HistoryOfMoves.Count > 0 && !ChessBoard.GameFinished;
         }
+
         public void OnPropertyChanged(string propertyName)
         {
             PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
@@ -178,10 +198,27 @@ namespace ChessMaster
 
         public void Each_Tick(object o, EventArgs sender)
         {
+            if (!ChessBoard.GameFinished)
+            {
+                if (_isWhiteMove)
+                    WhiteSideTime = WhiteSideTime.Add(new TimeSpan(0, 0, 1));
+                else
+                    BlackSideTime = BlackSideTime.Add(new TimeSpan(0, 0, 1));
+            }
+        }
+
+        private void ChangeTimersBorderColor()
+        {
             if (_isWhiteMove)
-                WhiteSideTime = WhiteSideTime.Add(new TimeSpan(0, 0, 1));
+            {
+                WhiteSideBorderColor = new SolidColorBrush(Colors.Green);
+                BlackSideBorderColor = new SolidColorBrush(Colors.White);
+            }
             else
-                BlackSideTime = BlackSideTime.Add(new TimeSpan(0, 0, 1));
-        }       
+            {
+                WhiteSideBorderColor = new SolidColorBrush(Colors.White);
+                BlackSideBorderColor = new SolidColorBrush(Colors.Green);
+            }
+        }
     }
 }
