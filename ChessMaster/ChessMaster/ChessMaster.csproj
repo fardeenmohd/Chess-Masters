@@ -60,6 +60,7 @@
     </Compile>
     <Compile Include="ViewModel\ChessBoard.cs" />
     <Compile Include="ViewModel\ChessCell.cs" />
+    <Compile Include="ViewModel\Evaluator.cs" />
     <Compile Include="ViewModel\Move.cs" />
     <Compile Include="ViewModel\RelayCommand.cs" />
     <Page Include="Dialogs\PromotionWindow.xaml">

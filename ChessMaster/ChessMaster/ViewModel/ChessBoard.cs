@@ -168,7 +168,11 @@ namespace ChessMaster.ViewModel
             }
             return legalMoves;
         }
-
+        public List<Point> GetEveryLegalMove(bool isWhite)
+        {
+            return this.Board.Where(bp => bp.Piece != null && bp.Piece.IsWhite == isWhite)
+                .SelectMany(p => GetOnlyLegalMoves(p.Piece)).ToList();
+        }
         /// <summary>
         /// Creates a new object of type piece identical to "bp" in order to avoid referencing the same piece in the code, which causes unwanted behavior and conflicts
         /// </summary>
