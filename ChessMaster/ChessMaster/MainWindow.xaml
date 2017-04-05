@@ -52,6 +52,7 @@
                     <MenuItem Header="New game against AI" Command="{Binding NewGameAgainstAICommand}"/>
                     <MenuItem Header="New game against human" Command="{Binding NewGameAgainstHumanCommand}"/>
                 </MenuItem>
+                <MenuItem Header="Undo Move" Command="{Binding UnmakeMoveCommand}"/>
                 <Separator/>
                 <MenuItem Header="Exit" Command="{Binding ExitCommand}"/>
             </MenuItem>
@@ -59,9 +60,10 @@
 
         <StackPanel Grid.Row="1" Grid.ColumnSpan="4" Orientation="Horizontal" HorizontalAlignment="Center" VerticalAlignment="Center">
             <Label Content="Black side timer" Margin="5"/>
-            <TextBox IsReadOnly="True" Margin="5, 5, 5, 5" Text="{Binding BlackSideTime}"/>
+            <TextBox IsReadOnly="True" Margin="5" Text="{Binding BlackSideTime}" BorderThickness="4" BorderBrush="{Binding BlackSideBorderColor}"/>
             <Label Content="White side timer" Margin="5, 5, 5, 5"/>
-            <TextBox IsReadOnly="True" Margin="5" Text="{Binding WhiteSideTime}"/>
+            <TextBox IsReadOnly="True" Margin="5" Text="{Binding WhiteSideTime}" BorderThickness="4" BorderBrush="{Binding WhiteSideBorderColor}"/>
+            <Button Content="Undo Move" Margin="5" Command="{Binding UnmakeMoveCommand}"/>
         </StackPanel>
 
         <ItemsControl Grid.Column="1" Grid.Row="2" ItemsSource="{Binding Numbers}">
