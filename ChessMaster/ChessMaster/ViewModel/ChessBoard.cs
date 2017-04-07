@@ -14,7 +14,7 @@ namespace ChessMaster.ViewModel
     {
         public BasePiece CurrentPiece = null;
 
-        public int LastIndex = 0;
+        public List<PiecePossibleMove> CurrentPiecePossibleMoves;
 
         public List<ChessCell> Board;
 
@@ -36,6 +36,7 @@ namespace ChessMaster.ViewModel
                                 new Knight(6,7), new Rook(7,7)};
             Board = new List<ChessCell>();
             HistoryOfMoves = new List<Move>();
+            CurrentPiecePossibleMoves = new List<PiecePossibleMove>();
             for (int y = 0; y < 8; y++)
             {
                 for (int x = 0; x < 8; x++)
@@ -70,27 +71,20 @@ namespace ChessMaster.ViewModel
             if (CurrentPiece != null)
             {
                 AssignCellBlackBorder();
-                BasePiece takenPiece = (Board[index].Piece == null ? null : CopyPiece(Board[index].Piece));
-                Move madeMove;
-                if (takenPiece == null)
-                    madeMove = new Move(LastIndex, index, CopyPiece(CurrentPiece));
-                else
-                    madeMove = new Move(LastIndex, index, CopyPiece(CurrentPiece), takenPiece);
-                HistoryOfMoves.Add(madeMove);
+                PiecePossibleMove move = CurrentPiecePossibleMoves.Where(m => (int)(m.MoveToPosition.Y * 8 + m.MoveToPosition.X) == index).Single();
+                BasePiece promotionPiece = null;
                 if (CurrentPiece is Pawn && (Board[index].Position.Y == 0 || Board[index].Position.Y == 7))
                 {
                     PromotionWindow dialog = new PromotionWindow(CurrentPiece.IsWhite);
                     if (dialog.ShowDialog() == true)
                     {
-                        CurrentPiece = dialog.SelectedPiece;
+                        promotionPiece = dialog.SelectedPiece;
                     }
                 }
+                Move madeMove = new Move(move, CurrentPiece, Board[index].Piece, promotionPiece);
+                HistoryOfMoves.Add(madeMove);
+                madeMove.MakeMove(ref Board);
                 bool isWhite = CurrentPiece.IsWhite;
-                CurrentPiece.Position = Board[index].Position;
-                CurrentPiece.IsFirstMove = false;
-                Board[index].Piece = CurrentPiece;
-                Board[LastIndex].Piece = null;
-                LastIndex = 0;
                 CurrentPiece = null;
                 if (IsGameOver(!isWhite))
                 {
@@ -100,18 +94,12 @@ namespace ChessMaster.ViewModel
             }
         }
 
-        public void MakeFakeMove(int index)
+        public void MakeFakeMove(PiecePossibleMove move)
         {
-            BasePiece takenPiece = (Board[index].Piece == null ? null : CopyPiece(Board[index].Piece));
-            Move madeMove;
-            if (takenPiece == null)
-                madeMove = new Move(LastIndex, index, CopyPiece(CurrentPiece));
-            else
-                madeMove = new Move(LastIndex, index, CopyPiece(CurrentPiece), takenPiece);
+            int index = (int)(move.MoveToPosition.Y * 8 + move.MoveToPosition.X);
+            Move madeMove = new Move(move, CurrentPiece, Board[index].Piece);
             HistoryOfMoves.Add(madeMove);
-            CurrentPiece.Position = Board[index].Position;
-            Board[index].Piece = CurrentPiece;
-            Board[LastIndex].Piece = null;
+            madeMove.MakeMove(ref Board);
         }
 
         public void UnMakeLastMove()
@@ -126,8 +114,8 @@ namespace ChessMaster.ViewModel
             if (CurrentPiece == null)
             {
                 CurrentPiece = Board[index].Piece;
-                LastIndex = index;
-                foreach (Point p in GetOnlyLegalMoves(CurrentPiece))
+                CurrentPiecePossibleMoves = GetOnlyLegalMoves(CurrentPiece);
+                foreach (Point p in CurrentPiecePossibleMoves.Select(move => move.MoveToPosition))
                 {
                     int moveIndex = (int)p.Y * 8 + (int)p.X;
                     Board[moveIndex].BorderColor = new SolidColorBrush(Colors.Red);
@@ -137,8 +125,8 @@ namespace ChessMaster.ViewModel
             {
                 AssignCellBlackBorder();
                 CurrentPiece = Board[index].Piece;
-                LastIndex = index;
-                foreach (Point p in GetOnlyLegalMoves(CurrentPiece))
+                CurrentPiecePossibleMoves = GetOnlyLegalMoves(CurrentPiece);
+                foreach (Point p in CurrentPiecePossibleMoves.Select(move => move.MoveToPosition))
                 {
                     int moveIndex = (int)p.Y * 8 + (int)p.X;
                     Board[moveIndex].BorderColor = new SolidColorBrush(Colors.Red);
@@ -150,47 +138,50 @@ namespace ChessMaster.ViewModel
         /// Returns a list of legal moves based on possibleMoves
         /// </summary>
         /// <returns></returns>
-        private List<Point> GetOnlyLegalMoves(BasePiece pieceToBeChecked)
+        private List<PiecePossibleMove> GetOnlyLegalMoves(BasePiece pieceToBeChecked)
         {
-            List<Point> legalMoves = new List<Point>();
-            List<Point> possibleMoves = pieceToBeChecked.GetPossibleMoves(ToBasePieceList());           
+            List<PiecePossibleMove> legalMoves = new List<PiecePossibleMove>();
+            List<PiecePossibleMove> possibleMoves = pieceToBeChecked.GetPossibleMoves(ToBasePieceList());           
             CurrentPiece = pieceToBeChecked;
-            LastIndex = (int)pieceToBeChecked.Position.Y * 8 + (int)pieceToBeChecked.Position.X;
-            foreach (Point p in possibleMoves)
+            foreach (PiecePossibleMove move in possibleMoves)
             {
-                MakeFakeMove((int)(p.Y * 8 + p.X));
-                Point kingLocation = FindKingLocation(pieceToBeChecked.IsWhite);
-                if (!IsAttacked(kingLocation, pieceToBeChecked.IsWhite))
+                MakeFakeMove(move);
+                if (IsValidMove(move, pieceToBeChecked.IsWhite))
                 {
-                    legalMoves.Add(p);
+                    legalMoves.Add(move);
                 }
                 UnMakeLastMove();
             }
             return legalMoves;
         }
 
-        /// <summary>
-        /// Creates a new object of type piece identical to "bp" in order to avoid referencing the same piece in the code, which causes unwanted behavior and conflicts
-        /// </summary>
-        /// <returns></returns>
-        public BasePiece CopyPiece(BasePiece bp)
+        public bool IsValidMove(PiecePossibleMove move, bool isWhite)
         {
-            if (bp is Pawn)
-                return new Pawn((int)bp.Position.X, (int)bp.Position.Y, bp.IsWhite)
+            Point kingLocation = FindKingLocation(isWhite);
+            if (move.IsCastlingMove)
+            {
+                if (move.RookPosition.X == 0)
                 {
-                    IsFirstMove = bp.IsFirstMove
-                };
-            if (bp is Knight)
-                return new Knight((int)bp.Position.X, (int)bp.Position.Y, bp.IsWhite);
-            if (bp is Bishop)
-                return new Bishop((int)bp.Position.X, (int)bp.Position.Y, bp.IsWhite);
-            if (bp is Rook)
-                return new Rook((int)bp.Position.X, (int)bp.Position.Y, bp.IsWhite);
-            if (bp is Queen)
-                return new Queen((int)bp.Position.X, (int)bp.Position.Y, bp.IsWhite);
-            if (bp is King)
-                return new King((int)bp.Position.X, (int)bp.Position.Y, bp.IsWhite);
-            return null;
+                    for (int x = 4; x > 1; x--)
+                    {
+                        if (IsAttacked(new Point(x, kingLocation.Y), isWhite))
+                            return false;
+                    }
+                    return true;
+                }
+                else
+                {
+                    for (int x = 4; x < 7; x++)
+                    {
+                        if (IsAttacked(new Point(x, kingLocation.Y), isWhite))
+                            return false;
+                    }
+                    return true;
+                }
+            }
+            if (IsAttacked(kingLocation, isWhite))
+                return false;
+            else return true;
         }
 
         public Point FindKingLocation(bool isWhite)
@@ -230,7 +221,8 @@ namespace ChessMaster.ViewModel
         {
             int index = (int)p.Y * 8 + (int)p.X;
             var cellsUnderAttack = Board.Where(cell => cell.Piece != null && cell.Piece.IsWhite != isWhite)
-                                .SelectMany(cell => cell.Piece.GetPossibleMoves(ToBasePieceList()));
+                                .SelectMany(cell => cell.Piece.GetPossibleMoves(ToBasePieceList()))
+                                .Where(cell => !cell.IsCastlingMove).Select(cell => cell.MoveToPosition);
             return cellsUnderAttack.Contains(p);
         }
     }

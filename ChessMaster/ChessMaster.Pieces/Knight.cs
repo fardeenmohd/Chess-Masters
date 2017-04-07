@@ -21,9 +21,18 @@ namespace ChessMaster.Pieces
                 PieceImage = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "../../Images/black_knight.png");
             }
         }
-        public override List<Point> GetPossibleMoves(List<BasePiece> board)
+
+        public override List<PiecePossibleMove> GetPossibleMoves(List<BasePiece> board)
         {
             return base.GetKnightMoves(board);
+        }
+
+        public override BasePiece CopyPiece()
+        {
+            return new Knight((int)Position.X, (int)Position.Y, IsWhite)
+            {
+                IsFirstMove = IsFirstMove
+            };
         }
     }
 }
