@@ -67,7 +67,7 @@ namespace ChessMaster.ViewModel
         /// </summary>
         /// <returns></returns>
         public void MakeMove(int index)
-        {           
+        {
             if (CurrentPiece != null)
             {
                 AssignCellBlackBorder();
@@ -141,7 +141,7 @@ namespace ChessMaster.ViewModel
         private List<PiecePossibleMove> GetOnlyLegalMoves(BasePiece pieceToBeChecked)
         {
             List<PiecePossibleMove> legalMoves = new List<PiecePossibleMove>();
-            List<PiecePossibleMove> possibleMoves = pieceToBeChecked.GetPossibleMoves(ToBasePieceList());           
+            List<PiecePossibleMove> possibleMoves = pieceToBeChecked.GetPossibleMoves(ToBasePieceList());
             CurrentPiece = pieceToBeChecked;
             foreach (PiecePossibleMove move in possibleMoves)
             {
@@ -153,6 +153,15 @@ namespace ChessMaster.ViewModel
                 UnMakeLastMove();
             }
             return legalMoves;
+        }
+        public List<PiecePossibleMove> GetEveryLegalMove(bool isWhite)
+        {
+            return this.Board.Where(bp => bp.Piece != null && bp.Piece.IsWhite == isWhite)
+                .SelectMany(p => GetOnlyLegalMoves(p.Piece)).Where(ppm => ppm != null)
+                .Select(ppm => new PiecePossibleMove(ppm.MoveToPosition)
+                { IsCastlingMove = ppm.IsCastlingMove,
+                    CastlingRook = ppm.CastlingRook,
+                    RookPosition = ppm.RookPosition}).ToList();
         }
 
         public bool IsValidMove(PiecePossibleMove move, bool isWhite)
@@ -186,9 +195,9 @@ namespace ChessMaster.ViewModel
 
         public Point FindKingLocation(bool isWhite)
         {
-            return Board.Find(p => p.Piece is King && p.Piece.IsWhite == isWhite).Position;      
+            return Board.Find(p => p.Piece is King && p.Piece.IsWhite == isWhite).Position;
         }
-        
+
         protected void AssignCellBlackBorder()
         {
             foreach (var cell in Board)
