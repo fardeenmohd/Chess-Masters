@@ -22,9 +22,18 @@ namespace ChessMaster.Pieces
             }
 
         }
-        public override List<Point> GetPossibleMoves(List<BasePiece> board)
+
+        public override List<PiecePossibleMove> GetPossibleMoves(List<BasePiece> board)
         {
             return base.GetDiagonalMoves(board, BOARDLENGTH);
+        }
+
+        public override BasePiece CopyPiece()
+        {
+            return new Bishop((int)Position.X, (int)Position.Y, IsWhite)
+            {
+                IsFirstMove = IsFirstMove
+            };
         }
     }
 }

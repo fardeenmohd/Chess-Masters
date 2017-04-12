@@ -23,7 +23,7 @@ namespace ChessMaster.Pieces
 
         public bool IsWhite { get; set; }
 
-        //Used for pawns only
+        //Used for pawns only and Castling
         public bool IsFirstMove { get; set; }
 
         public BasePiece(int x, int y, bool isWhite = true)
@@ -33,13 +33,21 @@ namespace ChessMaster.Pieces
             IsFirstMove = true;
         }
 
+        public virtual BasePiece CopyPiece()
+        {
+            return new BasePiece((int)Position.X, (int)Position.Y, IsWhite)
+            {
+                IsFirstMove = IsFirstMove
+            };
+        }
+
         /// <summary>
         /// Method should be overriden in the derived classes
         /// </summary>
         /// <returns></returns>
-        public virtual List<Point> GetPossibleMoves(List<BasePiece> board)
+        public virtual List<PiecePossibleMove> GetPossibleMoves(List<BasePiece> board)
         {
-            return new List<Point>();
+            return new List<PiecePossibleMove>();
         }
 
         /// <summary>
@@ -49,9 +57,9 @@ namespace ChessMaster.Pieces
         /// </summary>
         /// <param name="moveLength"></param>
         /// <returns></returns>
-        protected List<Point> GetHorizontalMoves(List<BasePiece> board, int moveLength = 1)
+        protected List<PiecePossibleMove> GetHorizontalMoves(List<BasePiece> board, int moveLength = 1)
         {
-            List<Point> moves = new List<Point>();
+            List<PiecePossibleMove> moves = new List<PiecePossibleMove>();
             int leftborder = (int)Position.X - moveLength > 0 ? (int)Position.X - moveLength : 0;
             int rightborder = (int)Position.X + moveLength < 7 ? (int)Position.X + moveLength : 7;
             for (int i = (int) Position.X - 1; i >= leftborder; i--)
@@ -74,9 +82,9 @@ namespace ChessMaster.Pieces
         /// </summary>
         /// <param name="moveLength"></param>
         /// <returns></returns>
-        protected List<Point> GetVerticalMoves(List<BasePiece> board, int moveLength = 1)
+        protected List<PiecePossibleMove> GetVerticalMoves(List<BasePiece> board, int moveLength = 1)
         {
-            List<Point> moves = new List<Point>();
+            List<PiecePossibleMove> moves = new List<PiecePossibleMove>();
             int upborder = (int)Position.Y - moveLength > 0 ? (int)Position.Y - moveLength : 0;
             int bottomborder = (int)Position.Y + moveLength < 7 ? (int)Position.Y + moveLength : 7;
             for (int i = (int) Position.Y - 1; i >= upborder; i--)
@@ -99,9 +107,9 @@ namespace ChessMaster.Pieces
         /// </summary>
         /// <param name="moveLength"></param>
         /// <returns></returns>
-        protected List<Point> GetDiagonalMoves(List<BasePiece> board, int moveLength = 1)
+        protected List<PiecePossibleMove> GetDiagonalMoves(List<BasePiece> board, int moveLength = 1)
         {
-            List<Point> moves = new List<Point>();
+            List<PiecePossibleMove> moves = new List<PiecePossibleMove>();
             for (int i = (int)Position.Y - 1, step = 1; step + Position.X <= 7 && step <= moveLength && i >= 0; step++, i--)
             {
                     if (AddMove(board, new Point(Position.X + step, i), ref moves))
@@ -130,9 +138,9 @@ namespace ChessMaster.Pieces
         /// Method returns a list of possible moves made by Knight
         /// </summary>
         /// <returns></returns>
-        protected List<Point> GetKnightMoves(List<BasePiece> board)
+        protected List<PiecePossibleMove> GetKnightMoves(List<BasePiece> board)
         {
-            List<Point> moves = new List<Point>();
+            List<PiecePossibleMove> moves = new List<PiecePossibleMove>();
             if (Position.X - 2 >= 0)
             {
                 if (Position.Y < 7)
@@ -172,16 +180,16 @@ namespace ChessMaster.Pieces
         /// <param name="isFirstMove"></param>
         /// <param name="isWhitePawn"></param>
         /// <returns></returns>
-        protected List<Point> GetPawnMoves(List<BasePiece> board, bool isFirstMove = false, bool isWhitePawn = true)
+        protected List<PiecePossibleMove> GetPawnMoves(List<BasePiece> board, bool isFirstMove = false, bool isWhitePawn = true)
         {
-            List<Point> moves = new List<Point>();
+            List<PiecePossibleMove> moves = new List<PiecePossibleMove>();
             int offset = isWhitePawn ? -1 : 1;
             int doubleOffset = isWhitePawn ? -2 : 2;
             if (board[(int)Position.X + 8 * ((int)Position.Y + offset)] == null)
             {
-                moves.Add(new Point(Position.X, Position.Y + offset));
+                moves.Add(new PiecePossibleMove(new Point(Position.X, Position.Y + offset)));
                 if (IsFirstMove && board[(int)Position.X + 8 * ((int)Position.Y + doubleOffset)] == null)
-                    moves.Add(new Point(Position.X, Position.Y + doubleOffset));
+                    moves.Add(new PiecePossibleMove(new Point(Position.X, Position.Y + doubleOffset)));
             }
             AddPawnAttackMoves(board, ref moves, isWhitePawn);
             return moves;
@@ -195,17 +203,17 @@ namespace ChessMaster.Pieces
         /// <param name="point"></param>
         /// <param name="moves"></param>
         /// <returns></returns>
-        private bool AddMove(List<BasePiece> board, Point point, ref List<Point> moves)
+        private bool AddMove(List<BasePiece> board, Point point, ref List<PiecePossibleMove> moves)
         {
             int index = 8*(int)point.Y + (int)point.X;
             if(board[index]==null)
             {
-                moves.Add(point);
+                moves.Add(new PiecePossibleMove(point));
                 return false;
             }
             else if(board[index].IsWhite != IsWhite)
             {
-                moves.Add(point);
+                moves.Add(new PiecePossibleMove(point));
                 return true;
             }
             return true;
@@ -217,15 +225,15 @@ namespace ChessMaster.Pieces
         /// <param name="board"></param>
         /// <param name="moves"></param>
         /// <param name="isWhitePawn"></param>
-        private void AddPawnAttackMoves(List<BasePiece> board, ref List<Point> moves, bool isWhitePawn)
+        private void AddPawnAttackMoves(List<BasePiece> board, ref List<PiecePossibleMove> moves, bool isWhitePawn)
         {
             int offset = isWhitePawn ? -1 : 1;
             BasePiece leftCell = board[((int)Position.Y + offset) * 8 + (int)Position.X - 1];
             BasePiece rightCell = board[((int)Position.Y + offset) * 8 + (int)Position.X + 1];
             if (leftCell != null && leftCell.IsWhite != IsWhite && (int)Position.X != 0)
-                moves.Add(new Point(Position.X - 1, Position.Y + offset));
+                moves.Add(new PiecePossibleMove(new Point(Position.X - 1, Position.Y + offset)));
             if (rightCell != null && rightCell.IsWhite != IsWhite && (int)Position.X != 7)
-                moves.Add(new Point(Position.X + 1, Position.Y + offset));
+                moves.Add(new PiecePossibleMove(new Point(Position.X + 1, Position.Y + offset)));
         }
     }
 }

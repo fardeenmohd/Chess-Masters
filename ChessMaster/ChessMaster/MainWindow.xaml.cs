@@ -13,7 +13,6 @@ using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
 using ChessMaster.Pieces;
-using ChessMaster.AI;
 using ChessMaster.ViewModel;
 using System.ComponentModel;
 using ChessMaster.Dialogs;
@@ -109,7 +108,8 @@ namespace ChessMaster
         public RelayCommand NewGameAgainstHumanCommand => _newGameAgainstHumanCommand ?? (_newGameAgainstHumanCommand = new RelayCommand(ExecuteNewGameAgainstHumanCommand));
         public RelayCommand CellCommand => _cellCommand ?? (_cellCommand = new RelayCommand(ExecuteCellCommand));
         public RelayCommand UnmakeMoveCommand => _unmakeMoveCommand ?? (_unmakeMoveCommand = new RelayCommand(ExecuteUnmakeMoveCommand, CanExecuteUnmakeMoveCommand));
-        
+
+        private Evaluator Evaluator = new Evaluator();
         #endregion
 
         public MainWindow()
@@ -166,9 +166,12 @@ namespace ChessMaster
                 int index = (int)currentPosition.Y * 8 + (int)currentPosition.X;
                 if (Cells[index].BorderColor.Color == Colors.Red)
                 {
+                    //MessageBox.Show("Evaluation for " + (_isWhiteMove ? "white: " + Evaluator.Max(ChessBoard, _isWhiteMove) : "black: " + Evaluator.Max(ChessBoard, !_isWhiteMove)));
+                    //MessageBox.Show("Evaluation: " + Evaluator.Max(ChessBoard, _isWhiteMove));
                     ChessBoard.MakeMove(index);
                     _isWhiteMove = !_isWhiteMove;
                     ChangeTimersBorderColor();
+                    
                 }
                 else if (Cells[index].Piece != null && Cells[index].Piece.IsWhite == _isWhiteMove)
                 {
