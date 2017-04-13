@@ -10,6 +10,8 @@ namespace ChessMaster.ViewModel
 {
     public class Move
     {
+        protected PiecePossibleMove _move; //Set so we can call CopyMove() and pass the same move
+
         protected int _fromPosition;
 
         protected int _toPosition;
@@ -34,8 +36,11 @@ namespace ChessMaster.ViewModel
 
         protected BasePiece _promotionPiece;
 
+        protected bool _hasMadeMove = false;
+
         public Move(PiecePossibleMove move, BasePiece piece, BasePiece takenPiece = null, BasePiece promotionPiece = null)
         {
+            _move = move;
             _fromPosition = (int)piece.Position.X + (int)piece.Position.Y * 8;
             _toPosition = (int)move.MoveToPosition.X + (int)move.MoveToPosition.Y * 8;
             _actualPiece = piece.CopyPiece();
@@ -48,6 +53,7 @@ namespace ChessMaster.ViewModel
             _castlingRookToPosition = move.IsCastlingMove ? (int)move.RookPosition.X + (int)move.RookPosition.Y * 8 : 0;
             _isPromotionMove = promotionPiece == null ? false : true;
             _promotionPiece = promotionPiece == null ? null : promotionPiece.CopyPiece();
+            _hasMadeMove = true;
         }
 
         public void MakeMove(ref List<ChessCell> board)
@@ -66,6 +72,7 @@ namespace ChessMaster.ViewModel
             board[_toPosition].Piece = movablePiece.CopyPiece();
             board[_toPosition].Piece.IsFirstMove = false;
             board[_fromPosition].Piece = null;
+            _hasMadeMove = true;
         }
 
         public void UnMakeMove(ref List<ChessCell> board)
@@ -82,6 +89,56 @@ namespace ChessMaster.ViewModel
                 _castlingRook.Position = board[_castlingRookFromPosition].Position;
                 board[_castlingRookFromPosition].Piece = _castlingRook; 
             }
+            _hasMadeMove = false;
+        }
+        //Shows the move in algebraic notation. Example: Ne4, d4, Qb3
+        //Should only be called after MakeMove()
+        public override string ToString()
+        {
+            string moveStr = "";
+            if(_hasMadeMove)
+            {
+                //First we check what piece
+                if (_actualPiece is Knight)
+                    moveStr += "N";
+                else if (_actualPiece is Bishop)
+                    moveStr += "B";
+                else if (_actualPiece is Rook)
+                    moveStr += "R";
+                else if (_actualPiece is Queen)
+                    moveStr += "Q";
+                else if (_actualPiece is King)
+                    moveStr += "K";
+                //If piece was taken we add an "x" which means the move involves capturing a piece
+                if (_takenPiece != null)
+                {
+                    if(_actualPiece is Pawn)
+                    {
+                        int previousX = _fromPosition % 8;
+                        moveStr += (char)(Convert.ToUInt16('a') + previousX);
+                    }
+                   
+                    moveStr += "x";
+                }
+                              
+            }
+            char file = (char)(Convert.ToUInt16('a') + (int)_actualPiece.Position.X);
+            moveStr += file;
+            moveStr += (8 - (int)_actualPiece.Position.Y);
+
+            return moveStr;
+        }
+
+        public Move CopyMove()
+        {
+            PiecePossibleMove piecePossibleMove = new PiecePossibleMove(new Point(_move.MoveToPosition.X, _move.MoveToPosition.Y), new Point(_move.FromPosition.X, _move.FromPosition.Y))
+            {
+                IsCastlingMove = _move.IsCastlingMove,
+                CastlingRook = _move.CastlingRook,
+                RookPosition = new Point(_move.RookPosition.X, _move.RookPosition.Y)
+            };
+
+            return new Move(piecePossibleMove, _actualPiece, _takenPiece, _promotionPiece);
         }
     }
 }

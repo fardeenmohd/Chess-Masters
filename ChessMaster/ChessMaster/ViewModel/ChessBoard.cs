@@ -22,6 +22,7 @@ namespace ChessMaster.ViewModel
 
         public bool GameFinished = false;
 
+        public Move LastMadeMove { get; set; }
         public ChessBoard()
         {
             List<BasePiece> blackPieces = new List<BasePiece>
@@ -84,6 +85,7 @@ namespace ChessMaster.ViewModel
                 Move madeMove = new Move(move, CurrentPiece, Board[index].Piece, promotionPiece);
                 HistoryOfMoves.Add(madeMove);
                 madeMove.MakeMove(ref Board);
+                LastMadeMove = madeMove;
                 bool isWhite = CurrentPiece.IsWhite;
                 CurrentPiece = null;
                 if (IsGameOver(!isWhite))
@@ -100,6 +102,7 @@ namespace ChessMaster.ViewModel
             Move madeMove = new Move(move, CurrentPiece, Board[index].Piece);
             HistoryOfMoves.Add(madeMove);
             madeMove.MakeMove(ref Board);
+            LastMadeMove = madeMove.CopyMove();
         }
 
         public void UnMakeLastMove()
@@ -158,10 +161,12 @@ namespace ChessMaster.ViewModel
         {
             return this.Board.Where(bp => bp.Piece != null && bp.Piece.IsWhite == isWhite)
                 .SelectMany(p => GetOnlyLegalMoves(p.Piece)).Where(ppm => ppm != null)
-                .Select(ppm => new PiecePossibleMove(ppm.MoveToPosition)
-                { IsCastlingMove = ppm.IsCastlingMove,
+                .Select(ppm => new PiecePossibleMove(new Point(ppm.MoveToPosition.X, ppm.MoveToPosition.Y), new Point(ppm.FromPosition.X, ppm.FromPosition.Y))
+                {
+                    IsCastlingMove = ppm.IsCastlingMove,
                     CastlingRook = ppm.CastlingRook,
-                    RookPosition = ppm.RookPosition}).ToList();
+                    RookPosition = new Point(ppm.RookPosition.X, ppm.RookPosition.Y)
+                }).ToList();
         }
 
         public bool IsValidMove(PiecePossibleMove move, bool isWhite)
