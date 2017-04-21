@@ -85,7 +85,7 @@ namespace ChessMaster.ViewModel
                 Move madeMove = new Move(move, CurrentPiece, Board[index].Piece, promotionPiece);
                 HistoryOfMoves.Add(madeMove);
                 madeMove.MakeMove(ref Board);
-                LastMadeMove = madeMove;
+                LastMadeMove = madeMove.CopyMove();
                 bool isWhite = CurrentPiece.IsWhite;
                 CurrentPiece = null;
                 if (IsGameOver(!isWhite))

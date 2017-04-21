@@ -14,7 +14,7 @@ namespace ChessMaster.ViewModel
     /// </summary>
     public class Evaluator
     {
-        public const int MAX_DEPTH = 1;
+        public const int MAX_DEPTH = 3;
         public const int MAX_INT = int.MaxValue;
         public const int MIN_INT = int.MinValue;
         public Move BestMove { get; set; }
@@ -22,28 +22,29 @@ namespace ChessMaster.ViewModel
         {
             if (depth == 0) return EvaluatePosition(board, isWhite);
             double max = MIN_INT;
-            //BasePiece originalCurrentPiece = board.CurrentPiece.CopyPiece();
             List<PiecePossibleMove> moves = board.GetEveryLegalMove(isWhite);
             foreach (PiecePossibleMove move in moves)
             {
                 board.CurrentPiece = board.Board[(int)move.FromPosition.Y * 8 + (int)move.FromPosition.X].Piece;
+                BasePiece originalPiece = board.CurrentPiece.CopyPiece();
+                originalPiece.IsFirstMove = false;
+                originalPiece.Position = move.MoveToPosition;
                 board.MakeFakeMove(move);
                 double score = Min(board, !isWhite, depth - 1);
                 if (score >= max)
                 {
                     max = score;
                     BestMove = board.LastMadeMove;
+                    BestMove.ParentMove = new Move(move, originalPiece);
                 }
                 board.UnMakeLastMove();                                
             }
-            //board.CurrentPiece = originalCurrentPiece;
             return max;
         }
         public virtual double Min(ChessBoard board, bool isWhite, int depth = MAX_DEPTH)
         {
             if (depth == 0) return EvaluatePosition(board, isWhite); 
             double min = MAX_INT;
-            //BasePiece originalCurrentPiece = board.CurrentPiece.CopyPiece();
             List<PiecePossibleMove> moves = board.GetEveryLegalMove(isWhite);
             foreach (PiecePossibleMove move in moves)
             {
@@ -54,7 +55,6 @@ namespace ChessMaster.ViewModel
                 if (score < min)
                     min = score;
             }
-            //board.CurrentPiece = originalCurrentPiece;
             return min;
         }
         public virtual double EvaluatePosition(ChessBoard board, bool isWhite)

@@ -170,9 +170,7 @@ namespace ChessMaster
                     ChessBoard.MakeMove(index);
                     _isWhiteMove = !_isWhiteMove;
                     ChangeTimersBorderColor();
-                    //BasePiece originalCurrentPiece = ChessBoard.CurrentPiece.CopyPiece();
-                    MessageBox.Show("Evaluation: " + Evaluator.Max(ChessBoard, _isWhiteMove) + "\n Best Move: " + Evaluator.BestMove.ToString());
-                    //ChessBoard.CurrentPiece = originalCurrentPiece;
+                    MessageBox.Show("Evaluation: " + Evaluator.Max(ChessBoard, _isWhiteMove) + "\n Best Move: " + Evaluator.BestMove.ParentMove.ToString());
 
                 }
                 else if (Cells[index].Piece != null && Cells[index].Piece.IsWhite == _isWhiteMove)

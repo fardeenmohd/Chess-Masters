@@ -38,6 +38,8 @@ namespace ChessMaster.ViewModel
 
         protected bool _hasMadeMove = false;
 
+        public Move ParentMove { get; set; }
+
         public Move(PiecePossibleMove move, BasePiece piece, BasePiece takenPiece = null, BasePiece promotionPiece = null)
         {
             _move = move;
@@ -116,8 +118,7 @@ namespace ChessMaster.ViewModel
                     {
                         int previousX = _fromPosition % 8;
                         moveStr += (char)(Convert.ToUInt16('a') + previousX);
-                    }
-                   
+                    }                   
                     moveStr += "x";
                 }
                               
