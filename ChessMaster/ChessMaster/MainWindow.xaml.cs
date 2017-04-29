@@ -33,6 +33,17 @@ namespace ChessMaster
         private TimeSpan _whiteSideTime;
         private SolidColorBrush _blackSideBorderColor;
         private SolidColorBrush _whiteSideBorderColor;
+        private List<LogMove> _logs;
+
+        public List<LogMove> Logs
+        {
+            get { return _logs; }
+            set
+            {
+                _logs = value;
+                OnPropertyChanged(nameof(Logs));
+            }
+        }
 
         public SolidColorBrush BlackSideBorderColor
         {
@@ -125,6 +136,7 @@ namespace ChessMaster
             Numbers = Enumerable.Range(1, 8).Reverse().ToList();
             Letters = new List<char> { 'a', 'b', 'c', 'd', 'e', 'f', 'g', 'h' };
             ChessBoard = new ChessBoard();
+            Logs = new List<LogMove>();
             Cells = ChessBoard.Board;
             _isWhiteMove = true;
             ChangeTimersBorderColor();      
@@ -146,6 +158,7 @@ namespace ChessMaster
         public void ExecuteNewGameAgainstHumanCommand(object obj)
         {
             ChessBoard = new ChessBoard();
+            Logs = new List<LogMove>();
             Cells = ChessBoard.Board;
             WhiteSideTime = new TimeSpan();
             BlackSideTime = new TimeSpan();
@@ -167,10 +180,10 @@ namespace ChessMaster
                 if (Cells[index].BorderColor.Color == Colors.Red)
                 {
                     //MessageBox.Show("Evaluation for " + (_isWhiteMove ? "white: " + Evaluator.Max(ChessBoard, _isWhiteMove) : "black: " + Evaluator.Max(ChessBoard, !_isWhiteMove)));                   
-                    ChessBoard.MakeMove(index);
+                    ChessBoard.MakeMove(index, true);
                     _isWhiteMove = !_isWhiteMove;
                     ChangeTimersBorderColor();
-                    MessageBox.Show("Evaluation: " + Evaluator.Max(ChessBoard, _isWhiteMove) + "\n Best Move: " + Evaluator.BestMove.ParentMove.ToString());
+                    //MessageBox.Show("Evaluation: " + Evaluator.Max(ChessBoard, _isWhiteMove) + "\n Best Move: " + Evaluator.BestMove.ParentMove.ToString());
 
                 }
                 else if (Cells[index].Piece != null && Cells[index].Piece.IsWhite == _isWhiteMove)
@@ -178,15 +191,17 @@ namespace ChessMaster
                     ChessBoard.ShowPossibleMoves(index);
                 }
                 Cells = new List<ChessCell>(ChessBoard.Board);
+                Logs = new List<LogMove>(ChessBoard.Logs);
             }
         }
 
         public void ExecuteUnmakeMoveCommand(object obj)
         {
-            ChessBoard.UnMakeLastMove();
+            ChessBoard.UnMakeLastMove(true);
             _isWhiteMove = !_isWhiteMove;
             ChangeTimersBorderColor();
-            Cells = new List<ChessCell>(ChessBoard.Board); // This updates the GUI
+            Cells = new List<ChessCell>(ChessBoard.Board);
+            Logs = new List<LogMove>(ChessBoard.Logs);// This updates the GUI
         }
 
         public bool CanExecuteUnmakeMoveCommand(object obj)
