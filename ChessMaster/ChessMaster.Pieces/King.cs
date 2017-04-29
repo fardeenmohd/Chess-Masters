@@ -55,7 +55,7 @@ namespace ChessMaster.Pieces
                     }
                 }
                 if (isMovePossible)
-                    moves.Add(new PiecePossibleMove(new Point(2, y), true, board[leftRookIndex], new Point(3, y)));
+                    moves.Add(new PiecePossibleMove(new Point(2, y), new Point(Position.X, Position.Y), true, board[leftRookIndex], new Point(3, y)));
             }
             if (IsFirstMove && board[rightRookIndex] != null && board[rightRookIndex] is Rook && board[rightRookIndex].IsFirstMove)
             {
@@ -70,7 +70,7 @@ namespace ChessMaster.Pieces
                     }
                 }
                 if (isMovePossible)
-                    moves.Add(new PiecePossibleMove(new Point(6, y), true, board[rightRookIndex], new Point(5, y)));
+                    moves.Add(new PiecePossibleMove(new Point(6, y), new Point(Position.X, Position.Y), true, board[rightRookIndex], new Point(5, y)));
             }
             return moves;
         }

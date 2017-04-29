@@ -166,12 +166,12 @@ namespace ChessMaster
                 int index = (int)currentPosition.Y * 8 + (int)currentPosition.X;
                 if (Cells[index].BorderColor.Color == Colors.Red)
                 {
-                    //MessageBox.Show("Evaluation for " + (_isWhiteMove ? "white: " + Evaluator.Max(ChessBoard, _isWhiteMove) : "black: " + Evaluator.Max(ChessBoard, !_isWhiteMove)));
-                    //MessageBox.Show("Evaluation: " + Evaluator.Max(ChessBoard, _isWhiteMove));
+                    //MessageBox.Show("Evaluation for " + (_isWhiteMove ? "white: " + Evaluator.Max(ChessBoard, _isWhiteMove) : "black: " + Evaluator.Max(ChessBoard, !_isWhiteMove)));                   
                     ChessBoard.MakeMove(index);
                     _isWhiteMove = !_isWhiteMove;
                     ChangeTimersBorderColor();
-                    
+                    MessageBox.Show("Evaluation: " + Evaluator.Max(ChessBoard, _isWhiteMove) + "\n Best Move: " + Evaluator.BestMove.ParentMove.ToString());
+
                 }
                 else if (Cells[index].Piece != null && Cells[index].Piece.IsWhite == _isWhiteMove)
                 {

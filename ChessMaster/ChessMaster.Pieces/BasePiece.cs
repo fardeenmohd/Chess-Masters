@@ -187,9 +187,9 @@ namespace ChessMaster.Pieces
             int doubleOffset = isWhitePawn ? -2 : 2;
             if (board[(int)Position.X + 8 * ((int)Position.Y + offset)] == null)
             {
-                moves.Add(new PiecePossibleMove(new Point(Position.X, Position.Y + offset)));
+                moves.Add(new PiecePossibleMove(new Point(Position.X, Position.Y + offset), new Point(Position.X, Position.Y)));
                 if (IsFirstMove && board[(int)Position.X + 8 * ((int)Position.Y + doubleOffset)] == null)
-                    moves.Add(new PiecePossibleMove(new Point(Position.X, Position.Y + doubleOffset)));
+                    moves.Add(new PiecePossibleMove(new Point(Position.X, Position.Y + doubleOffset), new Point(Position.X, Position.Y)));
             }
             AddPawnAttackMoves(board, ref moves, isWhitePawn);
             return moves;
@@ -203,17 +203,17 @@ namespace ChessMaster.Pieces
         /// <param name="point"></param>
         /// <param name="moves"></param>
         /// <returns></returns>
-        private bool AddMove(List<BasePiece> board, Point point, ref List<PiecePossibleMove> moves)
+        private bool AddMove(List<BasePiece> board, Point toPoint, ref List<PiecePossibleMove> moves)
         {
-            int index = 8*(int)point.Y + (int)point.X;
+            int index = 8*(int)toPoint.Y + (int)toPoint.X;
             if(board[index]==null)
             {
-                moves.Add(new PiecePossibleMove(point));
+                moves.Add(new PiecePossibleMove(toPoint, new Point(Position.X, Position.Y)));
                 return false;
             }
             else if(board[index].IsWhite != IsWhite)
             {
-                moves.Add(new PiecePossibleMove(point));
+                moves.Add(new PiecePossibleMove(toPoint, new Point(Position.X, Position.Y)));
                 return true;
             }
             return true;
@@ -231,9 +231,9 @@ namespace ChessMaster.Pieces
             BasePiece leftCell = board[((int)Position.Y + offset) * 8 + (int)Position.X - 1];
             BasePiece rightCell = board[((int)Position.Y + offset) * 8 + (int)Position.X + 1];
             if (leftCell != null && leftCell.IsWhite != IsWhite && (int)Position.X != 0)
-                moves.Add(new PiecePossibleMove(new Point(Position.X - 1, Position.Y + offset)));
+                moves.Add(new PiecePossibleMove(new Point(Position.X - 1, Position.Y + offset), new Point(Position.X, Position.Y)));
             if (rightCell != null && rightCell.IsWhite != IsWhite && (int)Position.X != 7)
-                moves.Add(new PiecePossibleMove(new Point(Position.X + 1, Position.Y + offset)));
+                moves.Add(new PiecePossibleMove(new Point(Position.X + 1, Position.Y + offset), new Point(Position.X, Position.Y)));
         }
     }
 }
