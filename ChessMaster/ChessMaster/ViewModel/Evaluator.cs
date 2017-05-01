@@ -37,7 +37,7 @@ namespace ChessMaster.ViewModel
                     BestMove = board.LastMadeMove;
                     BestMove.ParentMove = new Move(move, originalPiece);
                 }
-                board.UnMakeLastMove();                                
+                board.UnMakeLastMove(false);                                
             }
             return max;
         }
@@ -51,7 +51,7 @@ namespace ChessMaster.ViewModel
                 board.CurrentPiece = board.Board[(int)move.FromPosition.Y * 8 + (int)move.FromPosition.X].Piece;
                 board.MakeFakeMove(move);
                 double score = Max(board, !isWhite, depth - 1);
-                board.UnMakeLastMove();
+                board.UnMakeLastMove(false);
                 if (score < min)
                     min = score;
             }

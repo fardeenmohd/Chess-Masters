@@ -20,6 +20,10 @@ namespace ChessMaster.ViewModel
 
         public List<Move> HistoryOfMoves;
 
+        public List<LogMove> Logs;
+
+        public int LastLogPosition;
+
         public bool GameFinished = false;
 
         public Move LastMadeMove { get; set; }
@@ -61,13 +65,15 @@ namespace ChessMaster.ViewModel
                     Board.Add(c);
                 }
             }
+            Logs = new List<LogMove>();
+            LastLogPosition = -1;
         }
 
         /// <summary>
         /// Makes a move on chess board
         /// </summary>
         /// <returns></returns>
-        public void MakeMove(int index)
+        public void MakeMove(int index, bool useLog)
         {
             if (CurrentPiece != null)
             {
@@ -88,11 +94,15 @@ namespace ChessMaster.ViewModel
                 LastMadeMove = madeMove.CopyMove();
                 bool isWhite = CurrentPiece.IsWhite;
                 CurrentPiece = null;
-                if (IsGameOver(!isWhite))
+                bool isGameOver = IsGameOver(!isWhite);
+                bool isChecked = IsAttacked(FindKingLocation(!isWhite), !isWhite);
+                if (isGameOver)
                 {
                     MessageBox.Show("Game over! " + (isWhite ? "White" : "Black") + " wins!");
                     GameFinished = true;
                 }
+                if (useLog)
+                    WriteLogMove(isGameOver, isChecked);
             }
         }
 
@@ -105,11 +115,18 @@ namespace ChessMaster.ViewModel
             LastMadeMove = madeMove.CopyMove();
         }
 
-        public void UnMakeLastMove()
+        public void UnMakeLastMove(bool useLog)
         {
             AssignCellBlackBorder();
             HistoryOfMoves[HistoryOfMoves.Count - 1].UnMakeMove(ref Board);
             HistoryOfMoves.RemoveAt(HistoryOfMoves.Count - 1);
+            if(useLog)
+            {
+                if (Logs[LastLogPosition].BlackMove == "")
+                    Logs.RemoveAt(LastLogPosition--);
+                else
+                    Logs[LastLogPosition].BlackMove = "";
+            }
         }
 
         public void ShowPossibleMoves(int index)
@@ -153,10 +170,11 @@ namespace ChessMaster.ViewModel
                 {
                     legalMoves.Add(move);
                 }
-                UnMakeLastMove();
+                UnMakeLastMove(false);
             }
             return legalMoves;
         }
+
         public List<PiecePossibleMove> GetEveryLegalMove(bool isWhite)
         {
             return this.Board.Where(bp => bp.Piece != null && bp.Piece.IsWhite == isWhite)
@@ -238,6 +256,39 @@ namespace ChessMaster.ViewModel
                                 .SelectMany(cell => cell.Piece.GetPossibleMoves(ToBasePieceList()))
                                 .Where(cell => !cell.IsCastlingMove).Select(cell => cell.MoveToPosition);
             return cellsUnderAttack.Contains(p);
+        }
+
+        private void WriteLogMove(bool isGameOver, bool isChecked)
+        {
+            bool isBlackLog = false;
+            if (LastLogPosition!=-1 && Logs[LastLogPosition].BlackMove == "")
+            {
+                Logs[LastLogPosition].BlackMove = HistoryOfMoves[HistoryOfMoves.Count - 1].ToString();
+                isBlackLog = true;
+            }
+            else
+            {
+                Logs.Add(new LogMove()
+                {
+                    MoveNumber = ++LastLogPosition + 1,
+                    WhiteMove = HistoryOfMoves[HistoryOfMoves.Count - 1].ToString()
+                });
+                isBlackLog = false;
+            }
+            if(isGameOver)
+            {
+                if (isBlackLog)
+                    Logs[LastLogPosition].BlackMove += "++";
+                else
+                    Logs[LastLogPosition].WhiteMove += "++";
+            }
+            else if(isChecked)
+            {
+                if (isBlackLog)
+                    Logs[LastLogPosition].BlackMove += "+";
+                else
+                    Logs[LastLogPosition].WhiteMove += "+";
+            }
         }
     }
 }

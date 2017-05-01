@@ -97,37 +97,51 @@ namespace ChessMaster.ViewModel
         //Should only be called after MakeMove()
         public override string ToString()
         {
-            string moveStr = "";
+            StringBuilder moveStr = new StringBuilder();
+            if (_isCastling && _castlingRookFromPosition % 8 == 0)
+                return "0-0-0";
+            if (_isCastling && _castlingRookFromPosition % 8 != 0)
+                return "0-0";
             if(_hasMadeMove)
             {
                 //First we check what piece
-                if (_actualPiece is Knight)
-                    moveStr += "N";
-                else if (_actualPiece is Bishop)
-                    moveStr += "B";
-                else if (_actualPiece is Rook)
-                    moveStr += "R";
-                else if (_actualPiece is Queen)
-                    moveStr += "Q";
-                else if (_actualPiece is King)
-                    moveStr += "K";
+                moveStr.Append(RecognisePiece(_actualPiece));
                 //If piece was taken we add an "x" which means the move involves capturing a piece
                 if (_takenPiece != null)
                 {
                     if(_actualPiece is Pawn)
                     {
                         int previousX = _fromPosition % 8;
-                        moveStr += (char)(Convert.ToUInt16('a') + previousX);
+                        moveStr.Append((char)(Convert.ToUInt16('a') + previousX));
                     }                   
-                    moveStr += "x";
+                    moveStr.Append("x");
                 }
                               
             }
-            char file = (char)(Convert.ToUInt16('a') + (int)_actualPiece.Position.X);
-            moveStr += file;
-            moveStr += (8 - (int)_actualPiece.Position.Y);
+            char file = (char)(Convert.ToUInt16('a') + _toPosition % 8);
+            moveStr.Append(file);
+            moveStr.Append(8 - _toPosition / 8);
+            if(_isPromotionMove)
+            {
+                moveStr.Append("=");
+                moveStr.Append(RecognisePiece(_promotionPiece));
+            }
+            return moveStr.ToString();
+        }
 
-            return moveStr;
+        protected string RecognisePiece(BasePiece piece)
+        {
+            if (piece is Knight)
+                return "N";
+            if (piece is Bishop)
+                return "B";
+            if (piece is Rook)
+                return "R";
+            if (piece is Queen)
+                return "Q";
+            if (piece is King)
+                return "K";
+            return "";
         }
 
         public Move CopyMove()
