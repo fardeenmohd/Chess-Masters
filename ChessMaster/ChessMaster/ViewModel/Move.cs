@@ -38,7 +38,7 @@ namespace ChessMaster.ViewModel
 
         protected bool _hasMadeMove = false;
 
-        public Move ParentMove { get; set; }
+        public List<Move> ParentMoves { get; set; }
 
         public Move(PiecePossibleMove move, BasePiece piece, BasePiece takenPiece = null, BasePiece promotionPiece = null)
         {
