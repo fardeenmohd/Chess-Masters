@@ -14,7 +14,7 @@ namespace ChessMaster.ViewModel
     /// </summary>
     public class Evaluator
     {
-        public const int MAX_DEPTH = 1;
+        public const int MAX_DEPTH = 2;
         public const int MAX_INT = int.MaxValue;
         public const int MIN_INT = int.MinValue;
         public List<Move> BestMoves = new List<Move>();
@@ -25,11 +25,11 @@ namespace ChessMaster.ViewModel
             List<PiecePossibleMove> moves = board.GetEveryLegalMove(isWhite);
             foreach (PiecePossibleMove move in moves)
             {
-                board.CurrentPiece = board.Board[(int)move.FromPosition.Y * 8 + (int)move.FromPosition.X].Piece;
+               
                 //BasePiece originalPiece = board.CurrentPiece.CopyPiece();
                 //originalPiece.IsFirstMove = false;
                 //originalPiece.Position = move.MoveToPosition;
-                board.MakeFakeMove(move);
+                board.MakeFakeMove(move, board.Board[(int)move.FromPosition.Y * 8 + (int)move.FromPosition.X].Piece.CopyPiece());
                 double score = Min(board, !isWhite, depth - 1);
                 if (score > max)
                 {
@@ -48,8 +48,7 @@ namespace ChessMaster.ViewModel
             List<PiecePossibleMove> moves = board.GetEveryLegalMove(isWhite);
             foreach (PiecePossibleMove move in moves)
             {
-                board.CurrentPiece = board.Board[(int)move.FromPosition.Y * 8 + (int)move.FromPosition.X].Piece;
-                board.MakeFakeMove(move);
+                board.MakeFakeMove(move, board.Board[(int)move.FromPosition.Y * 8 + (int)move.FromPosition.X].Piece.CopyPiece());
                 double score = Max(board, !isWhite, depth - 1);
                 board.UnMakeLastMove();
                 if (score < min)

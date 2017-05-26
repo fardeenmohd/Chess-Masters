@@ -104,7 +104,14 @@ namespace ChessMaster.ViewModel
             madeMove.MakeMove(ref Board);
             LastMadeMove = madeMove.CopyMove();
         }
-
+        public void MakeFakeMove(PiecePossibleMove move, BasePiece currentPiece)
+        {
+            int index = (int)(move.MoveToPosition.Y * 8 + move.MoveToPosition.X);
+            Move madeMove = new Move(move, currentPiece, Board[index].Piece);
+            HistoryOfMoves.Add(madeMove);
+            madeMove.MakeMove(ref Board);
+            LastMadeMove = madeMove.CopyMove();
+        }
         public void UnMakeLastMove()
         {
             AssignCellBlackBorder();
