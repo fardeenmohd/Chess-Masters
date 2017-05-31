@@ -24,11 +24,7 @@ namespace ChessMaster.ViewModel
             double max = MIN_INT;
             List<PiecePossibleMove> moves = board.GetEveryLegalMove(isWhite);
             foreach (PiecePossibleMove move in moves)
-            {
-               
-                //BasePiece originalPiece = board.CurrentPiece.CopyPiece();
-                //originalPiece.IsFirstMove = false;
-                //originalPiece.Position = move.MoveToPosition;
+            {              
                 board.MakeFakeMove(move, board.Board[(int)move.FromPosition.Y * 8 + (int)move.FromPosition.X].Piece.CopyPiece());
                 double score = Min(board, !isWhite, depth - 1);
                 if (score > max)
