@@ -167,15 +167,15 @@ namespace ChessMaster
                 if (Cells[index].BorderColor.Color == Colors.Red)
                 {
                     
-                    ChessBoard.MakeMove(index);
+                    ChessBoard.MakeMove(index);               
+                    _isWhiteMove = !_isWhiteMove;
                     Evaluator.BestMoves = new List<Move>();
-                    BasePiece currentPieceBeforeEval = ChessBoard.CurrentPiece.CopyPiece();
+                    //BasePiece currentPieceBeforeEval = ChessBoard.CurrentPiece.CopyPiece();
                     MessageBox.Show("Evaluation for " + (_isWhiteMove ? "white: " + Evaluator.Max(ChessBoard, _isWhiteMove) : "black: " + Evaluator.Max(ChessBoard, _isWhiteMove))
                                                       + "\n Best Move: " + Evaluator.BestMoves[Evaluator.BestMoves.Count - 1].ToString());
                     Evaluator.BestMoves = new List<Move>();
-                    ChessBoard.CurrentPiece = currentPieceBeforeEval;
-                    _isWhiteMove = !_isWhiteMove;
-                    
+                    //ChessBoard.CurrentPiece = currentPieceBeforeEval;
+
                     ChangeTimersBorderColor();
                     //MessageBox.Show("Evaluation: " + Evaluator.Max(ChessBoard, _isWhiteMove) /*+ "\n Best Move: " + Evaluator.BestMove.ParentMove.ToString()*/);
 

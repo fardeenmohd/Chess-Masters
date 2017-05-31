@@ -14,7 +14,7 @@ namespace ChessMaster.ViewModel
     /// </summary>
     public class Evaluator
     {
-        public const int MAX_DEPTH = 2;
+        public const int MAX_DEPTH = 3;
         public const int MAX_INT = int.MaxValue;
         public const int MIN_INT = int.MinValue;
         public List<Move> BestMoves = new List<Move>();

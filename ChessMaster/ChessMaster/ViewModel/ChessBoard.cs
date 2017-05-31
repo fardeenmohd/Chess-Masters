@@ -106,8 +106,17 @@ namespace ChessMaster.ViewModel
         }
         public void MakeFakeMove(PiecePossibleMove move, BasePiece currentPiece)
         {
+            Move madeMove;
             int index = (int)(move.MoveToPosition.Y * 8 + move.MoveToPosition.X);
-            Move madeMove = new Move(move, currentPiece, Board[index].Piece);
+            //TODO if piece is a pawn then promote to queen if it's at row 0 or row 7
+            if (currentPiece is Pawn && move.MoveToPosition.Y == 0 || move.MoveToPosition.Y == 7)
+            {
+                madeMove = new Move(move, currentPiece, Board[index].Piece, new Queen((int)move.MoveToPosition.X,(int) move.MoveToPosition.Y, currentPiece.IsWhite));
+            }
+            else
+            {
+                madeMove = new Move(move, currentPiece, Board[index].Piece);
+            }            
             HistoryOfMoves.Add(madeMove);
             madeMove.MakeMove(ref Board);
             LastMadeMove = madeMove.CopyMove();
