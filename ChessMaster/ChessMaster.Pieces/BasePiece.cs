@@ -235,5 +235,20 @@ namespace ChessMaster.Pieces
             if (rightCell != null && rightCell.IsWhite != IsWhite && (int)Position.X != 7)
                 moves.Add(new PiecePossibleMove(new Point(Position.X + 1, Position.Y + offset), new Point(Position.X, Position.Y)));
         }
+
+        public override bool Equals(object obj)
+        {
+            if (obj.GetHashCode() == GetHashCode())
+                return true;
+            BasePiece piece = obj as BasePiece;
+            if (piece == null)
+                return false;
+            return piece.Position.X == Position.X && piece.Position.Y == Position.Y && IsWhite == piece.IsWhite;
+        }
+
+        public override int GetHashCode()
+        {
+            return base.GetHashCode();
+        }
     }
 }

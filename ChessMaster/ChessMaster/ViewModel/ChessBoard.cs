@@ -96,31 +96,31 @@ namespace ChessMaster.ViewModel
             }
         }
 
-        public void MakeFakeMove(PiecePossibleMove move)
+        public void MakeFakeMove(PiecePossibleMove move, BasePiece actualPiece)
         {
             int index = (int)(move.MoveToPosition.Y * 8 + move.MoveToPosition.X);
-            Move madeMove = new Move(move, CurrentPiece, Board[index].Piece);
+            Move madeMove = new Move(move, actualPiece, Board[index].Piece);
             HistoryOfMoves.Add(madeMove);
             madeMove.MakeMove(ref Board);
             LastMadeMove = madeMove.CopyMove();
         }
-        public void MakeFakeMove(PiecePossibleMove move, BasePiece currentPiece)
-        {
-            Move madeMove;
-            int index = (int)(move.MoveToPosition.Y * 8 + move.MoveToPosition.X);
-            //TODO if piece is a pawn then promote to queen if it's at row 0 or row 7
-            if (currentPiece is Pawn && move.MoveToPosition.Y == 0 || move.MoveToPosition.Y == 7)
-            {
-                madeMove = new Move(move, currentPiece, Board[index].Piece, new Queen((int)move.MoveToPosition.X,(int) move.MoveToPosition.Y, currentPiece.IsWhite));
-            }
-            else
-            {
-                madeMove = new Move(move, currentPiece, Board[index].Piece);
-            }            
-            HistoryOfMoves.Add(madeMove);
-            madeMove.MakeMove(ref Board);
-            LastMadeMove = madeMove.CopyMove();
-        }
+        //public void MakeFakeMove(PiecePossibleMove move, BasePiece currentPiece)
+        //{
+        //    Move madeMove;
+        //    int index = (int)(move.MoveToPosition.Y * 8 + move.MoveToPosition.X);
+        //    //TODO if piece is a pawn then promote to queen if it's at row 0 or row 7
+        //    if (currentPiece is Pawn && move.MoveToPosition.Y == 0 || move.MoveToPosition.Y == 7)
+        //    {
+        //        madeMove = new Move(move, currentPiece, Board[index].Piece, new Queen((int)move.MoveToPosition.X,(int) move.MoveToPosition.Y, currentPiece.IsWhite));
+        //    }
+        //    else
+        //    {
+        //        madeMove = new Move(move, currentPiece, Board[index].Piece);
+        //    }            
+        //    HistoryOfMoves.Add(madeMove);
+        //    madeMove.MakeMove(ref Board);
+        //    LastMadeMove = madeMove.CopyMove();
+        //}
         public void UnMakeLastMove()
         {
             AssignCellBlackBorder();
@@ -140,7 +140,7 @@ namespace ChessMaster.ViewModel
                     Board[moveIndex].BorderColor = new SolidColorBrush(Colors.Red);
                 }
             }
-            else if (CurrentPiece != null && CurrentPiece != Board[index].Piece)
+            else if (CurrentPiece != null && !CurrentPiece.Equals(Board[index].Piece))
             {
                 AssignCellBlackBorder();
                 CurrentPiece = Board[index].Piece;
@@ -161,10 +161,9 @@ namespace ChessMaster.ViewModel
         {
             List<PiecePossibleMove> legalMoves = new List<PiecePossibleMove>();
             List<PiecePossibleMove> possibleMoves = pieceToBeChecked.GetPossibleMoves(ToBasePieceList());
-            CurrentPiece = pieceToBeChecked;
             foreach (PiecePossibleMove move in possibleMoves)
             {
-                MakeFakeMove(move);
+                MakeFakeMove(move, pieceToBeChecked);
                 if (IsValidMove(move, pieceToBeChecked.IsWhite))
                 {
                     legalMoves.Add(move);
@@ -173,6 +172,7 @@ namespace ChessMaster.ViewModel
             }
             return legalMoves;
         }
+
         public List<PiecePossibleMove> GetEveryLegalMove(bool isWhite)
         {
             return this.Board.Where(bp => bp.Piece != null && bp.Piece.IsWhite == isWhite)
