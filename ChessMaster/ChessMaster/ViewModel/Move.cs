@@ -38,8 +38,6 @@ namespace ChessMaster.ViewModel
 
         protected bool _hasMadeMove = false;
 
-        public List<Move> ParentMoves { get; set; }
-
         public Move(PiecePossibleMove move, BasePiece piece, BasePiece takenPiece = null, BasePiece promotionPiece = null)
         {
             _move = move;
@@ -65,13 +63,14 @@ namespace ChessMaster.ViewModel
             if(_isCastling)
             {
                 board[_castlingRookFromPosition].Piece = null;
-                _castlingRook.Position = board[_castlingRookToPosition].Position;
-                board[_castlingRookToPosition].Piece = _castlingRook.CopyPiece();
+                BasePiece rook = _castlingRook.CopyPiece();
+                rook.Position = board[_castlingRookToPosition].Position;
+                board[_castlingRookToPosition].Piece = rook;
                 board[_castlingRookToPosition].Piece.IsFirstMove = false;
             }
-            BasePiece movablePiece = _isPromotionMove ? _promotionPiece : _actualPiece;
+            BasePiece movablePiece = _isPromotionMove ? _promotionPiece.CopyPiece() : _actualPiece.CopyPiece();
             movablePiece.Position = board[_toPosition].Position;
-            board[_toPosition].Piece = movablePiece.CopyPiece();
+            board[_toPosition].Piece = movablePiece;
             board[_toPosition].Piece.IsFirstMove = false;
             board[_fromPosition].Piece = null;
             _hasMadeMove = true;
@@ -123,9 +122,9 @@ namespace ChessMaster.ViewModel
                 }
                               
             }
-            char file = (char)(Convert.ToUInt16('a') + (int)_actualPiece.Position.X);
+            char file = (char)(Convert.ToUInt16('a') + _toPosition % 8);
             moveStr += file;
-            moveStr += (8 - (int)_actualPiece.Position.Y);
+            moveStr += (8 - _toPosition / 8);
 
             return moveStr;
         }

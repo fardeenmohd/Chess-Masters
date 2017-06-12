@@ -96,31 +96,37 @@ namespace ChessMaster.ViewModel
             }
         }
 
-        public void MakeFakeMove(PiecePossibleMove move, BasePiece actualPiece)
+        public void MakeSpecificMove(Move move, bool isWhite)
+        {
+            HistoryOfMoves.Add(move);
+            move.MakeMove(ref Board);
+            LastMadeMove = move.CopyMove();
+            if (IsGameOver(!isWhite))
+            {
+                MessageBox.Show("Game over! " + (isWhite ? "White" : "Black") + " wins!");
+                GameFinished = true;
+            }
+        }
+
+        public Move MakeFakeMove(PiecePossibleMove move, BasePiece actualPiece)
         {
             int index = (int)(move.MoveToPosition.Y * 8 + move.MoveToPosition.X);
-            Move madeMove = new Move(move, actualPiece, Board[index].Piece);
+            Move madeMove;
+            //TODO if piece is a pawn then promote to queen if it's at row 0 or row 7
+            if (actualPiece is Pawn && (move.MoveToPosition.Y == 0 || move.MoveToPosition.Y == 7))
+            {
+                madeMove = new Move(move, actualPiece, Board[index].Piece, new Queen((int)move.MoveToPosition.X, (int)move.MoveToPosition.Y, actualPiece.IsWhite));
+            }
+            else
+            {
+                madeMove = new Move(move, actualPiece, Board[index].Piece);
+            }
             HistoryOfMoves.Add(madeMove);
             madeMove.MakeMove(ref Board);
             LastMadeMove = madeMove.CopyMove();
+            return madeMove;
         }
-        //public void MakeFakeMove(PiecePossibleMove move, BasePiece currentPiece)
-        //{
-        //    Move madeMove;
-        //    int index = (int)(move.MoveToPosition.Y * 8 + move.MoveToPosition.X);
-        //    //TODO if piece is a pawn then promote to queen if it's at row 0 or row 7
-        //    if (currentPiece is Pawn && move.MoveToPosition.Y == 0 || move.MoveToPosition.Y == 7)
-        //    {
-        //        madeMove = new Move(move, currentPiece, Board[index].Piece, new Queen((int)move.MoveToPosition.X,(int) move.MoveToPosition.Y, currentPiece.IsWhite));
-        //    }
-        //    else
-        //    {
-        //        madeMove = new Move(move, currentPiece, Board[index].Piece);
-        //    }            
-        //    HistoryOfMoves.Add(madeMove);
-        //    madeMove.MakeMove(ref Board);
-        //    LastMadeMove = madeMove.CopyMove();
-        //}
+       
         public void UnMakeLastMove()
         {
             AssignCellBlackBorder();
@@ -186,37 +192,43 @@ namespace ChessMaster.ViewModel
         }
 
         public bool IsValidMove(PiecePossibleMove move, bool isWhite)
-        {
-            Point kingLocation = FindKingLocation(isWhite);
-            if (move.IsCastlingMove)
+        {           
+            Point? location = FindKingLocation(isWhite);
+            if (location.HasValue)
             {
-                if (move.RookPosition.X == 0)
+                Point kingLocation = location.Value;
+                if (move.IsCastlingMove)
                 {
-                    for (int x = 4; x > 1; x--)
+                    if (move.RookPosition.X == 0)
                     {
-                        if (IsAttacked(new Point(x, kingLocation.Y), isWhite))
-                            return false;
+                        for (int x = 4; x > 1; x--)
+                        {
+                            if (IsAttacked(new Point(x, kingLocation.Y), isWhite))
+                                return false;
+                        }
+                        return true;
                     }
-                    return true;
-                }
-                else
-                {
-                    for (int x = 4; x < 7; x++)
+                    else
                     {
-                        if (IsAttacked(new Point(x, kingLocation.Y), isWhite))
-                            return false;
+                        for (int x = 4; x < 7; x++)
+                        {
+                            if (IsAttacked(new Point(x, kingLocation.Y), isWhite))
+                                return false;
+                        }
+                        return true;
                     }
-                    return true;
                 }
+                if (IsAttacked(kingLocation, isWhite))
+                    return false;
+                else return true;
             }
-            if (IsAttacked(kingLocation, isWhite))
-                return false;
-            else return true;
+            else
+                return true;
         }
 
-        public Point FindKingLocation(bool isWhite)
+        public Point? FindKingLocation(bool isWhite)
         {
-            return Board.Find(p => p.Piece is King && p.Piece.IsWhite == isWhite).Position;
+            return Board.Find(p => p.Piece is King && p.Piece.IsWhite == isWhite)?.Position;
         }
 
         protected void AssignCellBlackBorder()

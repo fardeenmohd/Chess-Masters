@@ -169,16 +169,14 @@ namespace ChessMaster
                     
                     ChessBoard.MakeMove(index);               
                     _isWhiteMove = !_isWhiteMove;
-                    Evaluator.BestMoves = new List<Move>();
-                    //BasePiece currentPieceBeforeEval = ChessBoard.CurrentPiece.CopyPiece();
-                    MessageBox.Show("Evaluation for " + (_isWhiteMove ? "white: " + Evaluator.Max(ChessBoard, _isWhiteMove) : "black: " + Evaluator.Max(ChessBoard, _isWhiteMove))
-                                                      + "\n Best Move: " + Evaluator.BestMoves[Evaluator.BestMoves.Count - 1].ToString());
-                    Evaluator.BestMoves = new List<Move>();
-                    //ChessBoard.CurrentPiece = currentPieceBeforeEval;
-
                     ChangeTimersBorderColor();
-                    //MessageBox.Show("Evaluation: " + Evaluator.Max(ChessBoard, _isWhiteMove) /*+ "\n Best Move: " + Evaluator.BestMove.ParentMove.ToString()*/);
-
+                    Evaluator.BestMove = null;
+                    double value = Evaluator.Max(ChessBoard, _isWhiteMove);
+                    MessageBox.Show("Evaluation for " + (_isWhiteMove ? "white: " + value : "black: " + value)
+                                                      + "\n Best Move: " + Evaluator.BestMove.ToString());
+                    ChessBoard.MakeSpecificMove(Evaluator.BestMove.CopyMove(), _isWhiteMove);
+                    _isWhiteMove = !_isWhiteMove;
+                    ChangeTimersBorderColor();
                 }
                 else if (Cells[index].Piece != null && Cells[index].Piece.IsWhite == _isWhiteMove)
                 {
