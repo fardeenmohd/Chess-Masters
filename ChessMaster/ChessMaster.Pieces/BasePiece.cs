@@ -228,8 +228,10 @@ namespace ChessMaster.Pieces
         private void AddPawnAttackMoves(List<BasePiece> board, ref List<PiecePossibleMove> moves, bool isWhitePawn)
         {
             int offset = isWhitePawn ? -1 : 1;
-            BasePiece leftCell = board[((int)Position.Y + offset) * 8 + (int)Position.X - 1];
-            BasePiece rightCell = board[((int)Position.Y + offset) * 8 + (int)Position.X + 1];
+            int leftIndex = ((int)Position.Y + offset) * 8 + (int)Position.X - 1;
+            int rightIndex = ((int)Position.Y + offset) * 8 + (int)Position.X + 1;
+            BasePiece leftCell = leftIndex > 0 ? board[leftIndex] : null;
+            BasePiece rightCell = rightIndex > 0 ? board[rightIndex] : null;
             if (leftCell != null && leftCell.IsWhite != IsWhite && (int)Position.X != 0)
                 moves.Add(new PiecePossibleMove(new Point(Position.X - 1, Position.Y + offset), new Point(Position.X, Position.Y)));
             if (rightCell != null && rightCell.IsWhite != IsWhite && (int)Position.X != 7)
