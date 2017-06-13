@@ -38,6 +38,8 @@ namespace ChessMaster.ViewModel
 
         protected bool _hasMadeMove = false;
 
+        public bool IsCastlingMove { get { return _isCastling; } /*set { _isCastling = value; }*/ }
+        public bool IsWhiteMove { get { return _actualPiece.IsWhite; } }
         public Move(PiecePossibleMove move, BasePiece piece, BasePiece takenPiece = null, BasePiece promotionPiece = null)
         {
             _move = move;

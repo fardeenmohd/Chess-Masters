@@ -22,6 +22,7 @@ namespace ChessMaster.ViewModel
 
         public bool GameFinished = false;
 
+        public Dictionary<bool, bool> hasCastled;
         public Move LastMadeMove { get; set; }
         public ChessBoard()
         {
@@ -38,6 +39,9 @@ namespace ChessMaster.ViewModel
             Board = new List<ChessCell>();
             HistoryOfMoves = new List<Move>();
             CurrentPiecePossibleMoves = new List<PiecePossibleMove>();
+            hasCastled = new Dictionary<bool, bool>();
+            hasCastled.Add(true, false);
+            hasCastled.Add(false, false);
             for (int y = 0; y < 8; y++)
             {
                 for (int x = 0; x < 8; x++)
@@ -86,6 +90,10 @@ namespace ChessMaster.ViewModel
                 HistoryOfMoves.Add(madeMove);
                 madeMove.MakeMove(ref Board);
                 LastMadeMove = madeMove.CopyMove();
+                if(madeMove.IsCastlingMove)
+                {
+                    hasCastled[madeMove.IsWhiteMove] = true;
+                }
                 bool isWhite = CurrentPiece.IsWhite;
                 CurrentPiece = null;
                 if (IsGameOver(!isWhite))
@@ -101,6 +109,10 @@ namespace ChessMaster.ViewModel
             HistoryOfMoves.Add(move);
             move.MakeMove(ref Board);
             LastMadeMove = move.CopyMove();
+            if (move.IsCastlingMove)
+            {
+                hasCastled[move.IsWhiteMove] = true;
+            }
             if (IsGameOver(!isWhite))
             {
                 MessageBox.Show("Game over! " + (isWhite ? "White" : "Black") + " wins!");
@@ -123,6 +135,10 @@ namespace ChessMaster.ViewModel
             }
             HistoryOfMoves.Add(madeMove);
             madeMove.MakeMove(ref Board);
+            if (madeMove.IsCastlingMove)
+            {
+                hasCastled[madeMove.IsWhiteMove] = true;
+            }
             LastMadeMove = madeMove.CopyMove();
             return madeMove;
         }
@@ -130,6 +146,10 @@ namespace ChessMaster.ViewModel
         public void UnMakeLastMove()
         {
             AssignCellBlackBorder();
+            if(HistoryOfMoves[HistoryOfMoves.Count - 1].IsCastlingMove)
+            {
+                hasCastled[HistoryOfMoves[HistoryOfMoves.Count - 1].IsWhiteMove] = false;
+            }
             HistoryOfMoves[HistoryOfMoves.Count - 1].UnMakeMove(ref Board);
             HistoryOfMoves.RemoveAt(HistoryOfMoves.Count - 1);
         }
@@ -258,7 +278,47 @@ namespace ChessMaster.ViewModel
         {
             return Board.Select(b => b.Piece).ToList();
         }
-
+        public int GetNumberOfAttackedPieces(BasePiece attackingPiece)
+        {
+            List<PiecePossibleMove> moves = GetOnlyLegalMoves(attackingPiece);
+            int count = 0;
+            foreach(PiecePossibleMove move in moves)
+            {
+                int index = (int)move.MoveToPosition.Y * 8 + (int)move.MoveToPosition.X;
+                if(Board[index].Piece != null)
+                {
+                    if(Board[index].Piece.IsWhite != attackingPiece.IsWhite)
+                    {
+                        count++;
+                    }
+                }
+            }
+            return count;
+        }
+        public int GetTotalNumOfAttackedPieces(bool isWhite)
+        {
+            int count = 0;
+            foreach(BasePiece bp in ToBasePieceList())
+            {
+                if(bp != null && bp.IsWhite == isWhite)
+                {
+                    count += GetNumberOfAttackedPieces(bp);
+                }
+            }
+            return count;
+        }
+        public int GetTotalNumberOfMoves(bool isWhite)
+        {
+            int count = 0;
+            foreach (BasePiece bp in ToBasePieceList())
+            {
+                if (bp != null && bp.IsWhite == isWhite)
+                {
+                    count += GetOnlyLegalMoves(bp).Count;
+                }
+            }
+            return count;
+        }
         public bool IsAttacked(Point p, bool isWhite)
         {
             int index = (int)p.Y * 8 + (int)p.X;

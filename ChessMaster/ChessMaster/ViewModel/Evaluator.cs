@@ -68,6 +68,9 @@ namespace ChessMaster.ViewModel
         public virtual double EvaluatePosition(ChessBoard board, bool isWhite)
         {
             double eval = 0;
+            const double CASTLE_BONUS = 10;
+            int ourMoves = 0;
+            int enemyMoves = 0;         
             foreach(BasePiece bp in board.ToBasePieceList())
             {
                 if(bp != null)
@@ -84,6 +87,7 @@ namespace ChessMaster.ViewModel
                             eval += 5;
                         if (bp is Queen)
                             eval += 9;
+                                            
                     }
                     else
                     {
@@ -98,8 +102,24 @@ namespace ChessMaster.ViewModel
                         if (bp is Queen)
                             eval -= 9;
                     }
+                    
                 }               
             }
+            
+            // Check if we castled and if our opponent has castled
+            if (board.hasCastled[isWhite])
+            {
+                eval += CASTLE_BONUS;
+            }
+            if (board.hasCastled[!isWhite])
+            {
+                eval -= CASTLE_BONUS;
+            }
+            // The more moves we can make the better
+            //eval += (board.GetTotalNumberOfMoves(isWhite) - board.GetTotalNumberOfMoves(!isWhite));
+
+            // The more pieces we attack the better
+            //eval += (board.GetTotalNumOfAttackedPieces(isWhite) / 2);
             return eval;
         }
     }
