@@ -38,8 +38,8 @@ namespace ChessMaster.ViewModel
 
         protected bool _hasMadeMove = false;
 
-        public Move ParentMove { get; set; }
-
+        public bool IsCastlingMove { get { return _isCastling; } /*set { _isCastling = value; }*/ }
+        public bool IsWhiteMove { get { return _actualPiece.IsWhite; } }
         public Move(PiecePossibleMove move, BasePiece piece, BasePiece takenPiece = null, BasePiece promotionPiece = null)
         {
             _move = move;
@@ -65,13 +65,14 @@ namespace ChessMaster.ViewModel
             if(_isCastling)
             {
                 board[_castlingRookFromPosition].Piece = null;
-                _castlingRook.Position = board[_castlingRookToPosition].Position;
-                board[_castlingRookToPosition].Piece = _castlingRook.CopyPiece();
+                BasePiece rook = _castlingRook.CopyPiece();
+                rook.Position = board[_castlingRookToPosition].Position;
+                board[_castlingRookToPosition].Piece = rook;
                 board[_castlingRookToPosition].Piece.IsFirstMove = false;
             }
-            BasePiece movablePiece = _isPromotionMove ? _promotionPiece : _actualPiece;
+            BasePiece movablePiece = _isPromotionMove ? _promotionPiece.CopyPiece() : _actualPiece.CopyPiece();
             movablePiece.Position = board[_toPosition].Position;
-            board[_toPosition].Piece = movablePiece.CopyPiece();
+            board[_toPosition].Piece = movablePiece;
             board[_toPosition].Piece.IsFirstMove = false;
             board[_fromPosition].Piece = null;
             _hasMadeMove = true;

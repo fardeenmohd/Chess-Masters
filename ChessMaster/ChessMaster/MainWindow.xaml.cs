@@ -103,6 +103,8 @@ namespace ChessMaster
 
         private bool _isWhiteMove;
 
+        private bool _versusAI;
+
         public ChessBoard ChessBoard;
 
         public event PropertyChangedEventHandler PropertyChanged;
@@ -129,6 +131,7 @@ namespace ChessMaster
             InitializeTimers();
             InitializeComponent();
             DataContext = this;
+            _versusAI = false;
         }
 
         private void InitializeLists()
@@ -157,6 +160,7 @@ namespace ChessMaster
 
         public void ExecuteNewGameAgainstHumanCommand(object obj)
         {
+            _versusAI = false;
             ChessBoard = new ChessBoard();
             Logs = new List<LogMove>();
             Cells = ChessBoard.Board;
@@ -168,7 +172,14 @@ namespace ChessMaster
 
         public void ExecuteNewGameAgainstAICommand(object obj)
         {
-            MessageBox.Show("You are not ready to face with superior machine!", "Human vs AI game", MessageBoxButton.OK, MessageBoxImage.Stop);
+            _versusAI = true;
+            ChessBoard = new ChessBoard();
+            Cells = ChessBoard.Board;
+            WhiteSideTime = new TimeSpan();
+            BlackSideTime = new TimeSpan();
+            _isWhiteMove = true;
+            ChangeTimersBorderColor();
+            //MessageBox.Show("You are not ready to face with superior machine!", "Human vs AI game", MessageBoxButton.OK, MessageBoxImage.Stop);
         }
 
         public void ExecuteCellCommand(object obj)
@@ -179,12 +190,26 @@ namespace ChessMaster
                 int index = (int)currentPosition.Y * 8 + (int)currentPosition.X;
                 if (Cells[index].BorderColor.Color == Colors.Red)
                 {
-                    //MessageBox.Show("Evaluation for " + (_isWhiteMove ? "white: " + Evaluator.Max(ChessBoard, _isWhiteMove) : "black: " + Evaluator.Max(ChessBoard, !_isWhiteMove)));                   
-                    ChessBoard.MakeMove(index, true);
+                    ChessBoard.MakeMove(index, true);               
                     _isWhiteMove = !_isWhiteMove;
                     ChangeTimersBorderColor();
-                    //MessageBox.Show("Evaluation: " + Evaluator.Max(ChessBoard, _isWhiteMove) + "\n Best Move: " + Evaluator.BestMove.ParentMove.ToString());
+                    Cells = new List<ChessCell>(ChessBoard.Board);
+                    Logs = new List<LogMove>(ChessBoard.Logs);
+                    if (_versusAI)
+                    {
+                        DispatcherFrame frame = new DispatcherFrame();
+                        Dispatcher.CurrentDispatcher.BeginInvoke(DispatcherPriority.Render, new DispatcherOperationCallback(delegate (object parameter)
+                        {
+                            frame.Continue = false;
+                            return null;
+                        }), null);
 
+                        Dispatcher.PushFrame(frame);
+                        //EDIT:
+                        Application.Current.Dispatcher.Invoke(DispatcherPriority.Background,
+                                                      new Action(delegate { }));
+                        AIMove();
+                    }
                 }
                 else if (Cells[index].Piece != null && Cells[index].Piece.IsWhite == _isWhiteMove)
                 {
@@ -195,18 +220,40 @@ namespace ChessMaster
             }
         }
 
-        public void ExecuteUnmakeMoveCommand(object obj)
+        public void AIMove()
         {
-            ChessBoard.UnMakeLastMove(true);
+            DateTime start = DateTime.Now;
+            Evaluator.BestMove = null;
+            double value = Evaluator.Max(ChessBoard, _isWhiteMove);
+            //MessageBox.Show("Evaluation for " + (_isWhiteMove ? "white: " + value : "black: " + value)
+            //                                  + "\n Best Move: " + Evaluator.BestMove.ToString());
+            ChessBoard.MakeSpecificMove(Evaluator.BestMove.CopyMove(), _isWhiteMove, true);
             _isWhiteMove = !_isWhiteMove;
             ChangeTimersBorderColor();
+            BlackSideTime = BlackSideTime.Add(new TimeSpan(0, 0, (DateTime.Now - start).Seconds));
+        }
+
+        public void ExecuteUnmakeMoveCommand(object obj)
+        {
+            if (!_versusAI)
+            {
+                ChessBoard.UnMakeLastMove(true);
+                _isWhiteMove = !_isWhiteMove;
+                ChangeTimersBorderColor();
+            }
+            else
+            {
+                ChessBoard.UnMakeLastMove(true);
+                ChessBoard.UnMakeLastMove(true);
+            }
             Cells = new List<ChessCell>(ChessBoard.Board);
-            Logs = new List<LogMove>(ChessBoard.Logs);// This updates the GUI
+            Logs = new List<LogMove>(ChessBoard.Logs); // This updates the GUI
         }
 
         public bool CanExecuteUnmakeMoveCommand(object obj)
         {
-            return ChessBoard.HistoryOfMoves.Count > 0 && !ChessBoard.GameFinished;
+            return (ChessBoard.HistoryOfMoves.Count > 0 && !ChessBoard.GameFinished && !_versusAI) 
+                || (ChessBoard.HistoryOfMoves.Count % 2 == 0  && ChessBoard.HistoryOfMoves.Count > 1 && !ChessBoard.GameFinished);
         }
 
         public void OnPropertyChanged(string propertyName)
