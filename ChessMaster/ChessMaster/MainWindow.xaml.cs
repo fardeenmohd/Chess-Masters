@@ -224,7 +224,7 @@ namespace ChessMaster
         {
             DateTime start = DateTime.Now;
             Evaluator.BestMove = null;
-            double value = Evaluator.Max(ChessBoard, _isWhiteMove);
+            double value = Evaluator.Max(ChessBoard, _isWhiteMove, 0, 0, 0, 0);
             //MessageBox.Show("Evaluation for " + (_isWhiteMove ? "white: " + value : "black: " + value)
             //                                  + "\n Best Move: " + Evaluator.BestMove.ToString());
             ChessBoard.MakeSpecificMove(Evaluator.BestMove.CopyMove(), _isWhiteMove, true);
